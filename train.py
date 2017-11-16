@@ -37,7 +37,7 @@ parser.add_argument("--cuda", type=str2bool, nargs='?',
                     help='whether to use GPU acceleration.')
 # training
 parser.add_argument('-e', '--epochs', type=int, default=45)
-parser.add_argument('-bs', '--batch_size', type=int, default=256)
+parser.add_argument('-bs', '--batch_size', type=int, default=32)
 parser.add_argument('-rs', '--resume', default='',
                     help='previous model file name (in `model_dir`). '
                          'e.g. "checkpoint_epoch_11.pt"')
