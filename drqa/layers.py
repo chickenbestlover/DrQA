@@ -61,8 +61,10 @@ class StackedBRNN(nn.Module):
                 rnn_input = F.dropout(rnn_input,
                                       p=self.dropout_rate,
                                       training=self.training)
-            # Forward
+            self.rnns[i].flatten_parameters()
             rnn_output = self.rnns[i](rnn_input)[0]
+
+
             outputs.append(rnn_output)
 
         # Concat hidden layers
@@ -114,7 +116,10 @@ class StackedBRNN(nn.Module):
                                           training=self.training)
                 rnn_input = nn.utils.rnn.PackedSequence(dropout_input,
                                                         rnn_input.batch_sizes)
-            outputs.append(self.rnns[i](rnn_input)[0])
+            self.rnns[i].flatten_parameters()
+            rnn_output = self.rnns[i](rnn_input)[0]
+
+            outputs.append(rnn_output)
 
         # Unpack everything
         for i, o in enumerate(outputs[1:], 1):

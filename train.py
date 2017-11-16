@@ -13,6 +13,7 @@ import msgpack
 from drqa.model import DocReaderModel
 from drqa.utils import str2bool
 
+
 parser = argparse.ArgumentParser(
     description='Train a Document Reader model.'
 )
@@ -21,8 +22,8 @@ parser.add_argument('--log_file', default='output.log',
                     help='path for log file.')
 parser.add_argument('--log_per_updates', type=int, default=3,
                     help='log model loss per x updates (mini-batches).')
-parser.add_argument('--data_file', default='SQuAD/data.msgpack',
-                    help='path to preprocessed data file.')
+parser.add_argument('--data_file', help='path to preprocessed data file.',
+                    default='SQuAD/data.msgpack')
 parser.add_argument('--model_dir', default='models',
                     help='path to store saved models.')
 parser.add_argument('--save_last_only', action='store_true',
@@ -35,8 +36,8 @@ parser.add_argument("--cuda", type=str2bool, nargs='?',
                     const=True, default=torch.cuda.is_available(),
                     help='whether to use GPU acceleration.')
 # training
-parser.add_argument('-e', '--epochs', type=int, default=40)
-parser.add_argument('-bs', '--batch_size', type=int, default=32)
+parser.add_argument('-e', '--epochs', type=int, default=45)
+parser.add_argument('-bs', '--batch_size', type=int, default=256)
 parser.add_argument('-rs', '--resume', default='',
                     help='previous model file name (in `model_dir`). '
                          'e.g. "checkpoint_epoch_11.pt"')
@@ -78,7 +79,8 @@ parser.add_argument('--dropout_rnn_output', type=str2bool, nargs='?',
 parser.add_argument('--max_len', type=int, default=15)
 parser.add_argument('--rnn_type', default='lstm',
                     help='supported types: rnn, gru, lstm')
-
+parser.add_argument('--parallel', action='store_true',
+                    help='Use data parallel (split across gpus)')
 args = parser.parse_args()
 
 # set model dir
@@ -130,6 +132,11 @@ def main():
 
     if args.cuda:
         model.cuda()
+
+    if args.parallel:
+        model.parallelize()
+
+
 
     if args.resume:
         batches = BatchGen(dev, batch_size=args.batch_size, evaluation=True, gpu=args.cuda)

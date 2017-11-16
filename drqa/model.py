@@ -5,6 +5,8 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 import torch
 import torch.optim as optim
+import torch.optim.lr_scheduler as lr_scheduler
+
 import torch.nn.functional as F
 import numpy as np
 import logging
@@ -32,6 +34,7 @@ class DocReaderModel(object):
         self.opt = opt
         self.updates = state_dict['updates'] if state_dict else 0
         self.train_loss = AverageMeter()
+        self.parallel = False
 
         # Building network.
         self.network = RnnDocReader(opt, embedding=embedding)
@@ -51,6 +54,7 @@ class DocReaderModel(object):
         elif opt['optimizer'] == 'adamax':
             self.optimizer = optim.Adamax(parameters,
                                           weight_decay=opt['weight_decay'])
+            self.scheduler = lr_scheduler.StepLR(self.optimizer,step_size=15,gamma=0.1)
         else:
             raise RuntimeError('Unsupported optimizer: %s' % opt['optimizer'])
         if state_dict:
@@ -129,9 +133,15 @@ class DocReaderModel(object):
         # Reset fixed embeddings to original value
         if self.opt['tune_partial'] > 0:
             offset = self.opt['tune_partial'] + 2
-            if offset < self.network.embedding.weight.data.size(0):
-                self.network.embedding.weight.data[offset:] \
-                    = self.network.fixed_embedding
+
+            if self.parallel:
+                if offset < self.network.module.embedding.weight.data.size(0):
+                    self.network.module.embedding.weight.data[offset:] \
+                        = self.network.module.fixed_embedding
+            else:
+                if offset < self.network.embedding.weight.data.size(0):
+                    self.network.embedding.weight.data[offset:] \
+                        = self.network.module.fixed_embedding
 
     def save(self, filename, epoch):
         params = {
@@ -151,3 +161,10 @@ class DocReaderModel(object):
 
     def cuda(self):
         self.network.cuda()
+
+    def parallelize(self):
+        """Use data parallel to copy the model across several gpus.
+        This will take all gpus visible with CUDA_VISIBLE_DEVICES.
+        """
+        self.parallel = True
+        self.network = torch.nn.DataParallel(self.network)
