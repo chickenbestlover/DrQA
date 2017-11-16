@@ -141,7 +141,7 @@ class DocReaderModel(object):
             else:
                 if offset < self.network.embedding.weight.data.size(0):
                     self.network.embedding.weight.data[offset:] \
-                        = self.network.module.fixed_embedding
+                        = self.network.fixed_embedding
 
     def save(self, filename, epoch):
         params = {
