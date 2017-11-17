@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser(
 # system
 parser.add_argument('--log_file', default='output.log',
                     help='path for log file.')
-parser.add_argument('--log_per_updates', type=int, default=3,
+parser.add_argument('--log_per_updates', type=int, default=100,
                     help='log model loss per x updates (mini-batches).')
 parser.add_argument('--data_file', help='path to preprocessed data file.',
                     default='SQuAD/data.msgpack')
@@ -36,7 +36,7 @@ parser.add_argument("--cuda", type=str2bool, nargs='?',
                     const=True, default=torch.cuda.is_available(),
                     help='whether to use GPU acceleration.')
 # training
-parser.add_argument('-e', '--epochs', type=int, default=45)
+parser.add_argument('-e', '--epochs', type=int, default=60)
 parser.add_argument('-bs', '--batch_size', type=int, default=32)
 parser.add_argument('-rs', '--resume', default='',
                     help='previous model file name (in `model_dir`). '
@@ -51,7 +51,7 @@ parser.add_argument('-gc', '--grad_clipping', type=float, default=10)
 parser.add_argument('-wd', '--weight_decay', type=float, default=0)
 parser.add_argument('-lr', '--learning_rate', type=float, default=0.1,
                     help='only applied to SGD.')
-parser.add_argument('-mm', '--momentum', type=float, default=0,
+parser.add_argument('-mm', '--momentum', type=float, default=0.9,
                     help='only applied to SGD.')
 parser.add_argument('-tp', '--tune_partial', type=int, default=1000,
                     help='finetune top-x embeddings.')
@@ -155,11 +155,12 @@ def main():
         batches = BatchGen(train, batch_size=args.batch_size, gpu=args.cuda)
         start = datetime.now()
         for i, batch in enumerate(batches):
-            model.update(batch)
+            model.update(batch,epoch)
             if i % args.log_per_updates == 0:
-                log.info('epoch [{0:2}] updates[{1:6}] train loss[{2:.5f}] remaining[{3}]'.format(
+                log.info('epoch [{0:2}] updates[{1:6}] train loss[{2:.5f}] remaining[{3}] lr[{4:.4f}]'.format(
                     epoch, model.updates, model.train_loss.avg,
-                    str((datetime.now() - start) / (i + 1) * (len(batches) - i - 1)).split('.')[0]))
+                    str((datetime.now() - start) / (i + 1) * (len(batches) - i - 1)).split('.')[0],
+                    model.optimizer.state_dict()['param_groups'][0]['lr']))
         # eval
         if epoch % args.eval_per_epoch == 0:
             batches = BatchGen(dev, batch_size=args.batch_size, evaluation=True, gpu=args.cuda)
