@@ -1,1 +1,6 @@
 *.pyc
+*.log
+SQuAD/
+models/
+glove/
+
