@@ -50,17 +50,17 @@ class DocReaderModel(object):
         if opt['optimizer'] == 'sgd':
             self.optimizer = optim.SGD(parameters, opt['learning_rate'],
                                        momentum=opt['momentum'],
-                                       weight_decay=opt['weight_decay'])
+                                       weight_decay=opt['weight_decay'],nesterov=True)
+            self.scheduler = lr_scheduler.StepLR(self.optimizer,step_size=20,gamma=0.1)
         elif opt['optimizer'] == 'adamax':
             self.optimizer = optim.Adamax(parameters,
                                           weight_decay=opt['weight_decay'])
-            self.scheduler = lr_scheduler.StepLR(self.optimizer,step_size=15,gamma=0.1)
         else:
             raise RuntimeError('Unsupported optimizer: %s' % opt['optimizer'])
         if state_dict:
             self.optimizer.load_state_dict(state_dict['optimizer'])
 
-    def update(self, ex):
+    def update(self, ex,epoch):
         # Train mode
         self.network.train()
 
@@ -90,7 +90,11 @@ class DocReaderModel(object):
                                       self.opt['grad_clipping'])
 
         # Update parameters
-        self.optimizer.step()
+        if self.opt['optimizer'] == 'sgd':
+            self.scheduler.step(epoch=epoch)
+            self.optimizer.step()
+        else:
+            self.optimizer.step()
         self.updates += 1
 
         # Reset any partially fixed parameters (e.g. rare words)
