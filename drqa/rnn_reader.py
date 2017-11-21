@@ -6,14 +6,14 @@
 import torch
 import torch.nn as nn
 from . import layers
-
+import sru.cuda_functional as MF
 # Modification: add 'pos' and 'ner' features.
 # Origin: https://github.com/facebookresearch/ParlAI/tree/master/parlai/agents/drqa
 
 
 class RnnDocReader(nn.Module):
     """Network for the Document Reader module of DrQA."""
-    RNN_TYPES = {'lstm': nn.LSTM, 'gru': nn.GRU, 'rnn': nn.RNN}
+    RNN_TYPES = {'lstm': nn.LSTM, 'gru': nn.GRU, 'rnn': nn.RNN, 'sru':MF}
 
     def __init__(self, opt, padding_idx=0, embedding=None):
         super(RnnDocReader, self).__init__()
@@ -106,7 +106,7 @@ class RnnDocReader(nn.Module):
         x1_f = document word features indices  [batch * len_d * nfeat]
         x1_pos = document POS tags             [batch * len_d]
         x1_ner = document entity tags          [batch * len_d]
-        x1_mask = document padding mask        [batch * len_d]
+        x1_mask = document padding mask        [batch * len_d]x1
         x2 = question word indices             [batch * len_q]
         x2_mask = question padding mask        [batch * len_q]
         """

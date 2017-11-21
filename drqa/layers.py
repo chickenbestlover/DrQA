@@ -14,6 +14,7 @@ from torch.autograd import Variable
 # ------------------------------------------------------------------------------
 # Modules
 # ------------------------------------------------------------------------------
+import sru.cuda_functional as MF
 
 
 class StackedBRNN(nn.Module):
@@ -27,18 +28,28 @@ class StackedBRNN(nn.Module):
         self.num_layers = num_layers
         self.concat_layers = concat_layers
         self.rnns = nn.ModuleList()
+
         for i in range(num_layers):
             input_size = input_size if i == 0 else 2 * hidden_size
-            self.rnns.append(rnn_type(input_size, hidden_size,
-                                      num_layers=1,
-                                      bidirectional=True))
+            if rnn_type == MF:
+                self.rnns.append(MF.SRUCell(input_size, hidden_size,
+                                            dropout=dropout_rate,
+                                            rnn_dropout=dropout_rate,
+                                            use_tanh=1,
+                                            bidirectional=True))
+            else:
+                self.rnns.append(rnn_type(input_size, hidden_size,
+                                          num_layers=1,
+                                          bidirectional=True))
+
+
 
     def forward(self, x, x_mask):
         """Can choose to either handle or ignore variable length sequences.
         Always handle padding in eval.
         """
         # No padding necessary.
-        if x_mask.data.sum() == 0:
+        if x_mask.data.sum() == 0 or self.rnns[0].__class__.__name__=='SRUCell':
             return self._forward_unpadded(x, x_mask)
         # Pad if we care or if its during eval.
         if self.padding or not self.training:
@@ -57,11 +68,11 @@ class StackedBRNN(nn.Module):
             rnn_input = outputs[-1]
 
             # Apply dropout to hidden input
-            if self.dropout_rate > 0:
-                rnn_input = F.dropout(rnn_input,
-                                      p=self.dropout_rate,
-                                      training=self.training)
-            self.rnns[i].flatten_parameters()
+            #if self.dropout_rate > 0:
+            #    rnn_input = F.dropout(rnn_input,
+            #                          p=self.dropout_rate,
+            #                          training=self.training)
+            #self.rnns[i].flatten_parameters()
             rnn_output = self.rnns[i](rnn_input)[0]
 
 
@@ -116,7 +127,7 @@ class StackedBRNN(nn.Module):
                                           training=self.training)
                 rnn_input = nn.utils.rnn.PackedSequence(dropout_input,
                                                         rnn_input.batch_sizes)
-            self.rnns[i].flatten_parameters()
+            #self.rnns[i].flatten_parameters()
             rnn_output = self.rnns[i](rnn_input)[0]
 
             outputs.append(rnn_output)

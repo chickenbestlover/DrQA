@@ -37,7 +37,7 @@ parser.add_argument("--cuda", type=str2bool, nargs='?',
                     help='whether to use GPU acceleration.')
 # training
 parser.add_argument('-e', '--epochs', type=int, default=60)
-parser.add_argument('-bs', '--batch_size', type=int, default=32)
+parser.add_argument('-bs', '--batch_size', type=int, default=128)
 parser.add_argument('-rs', '--resume', default='',
                     help='previous model file name (in `model_dir`). '
                          'e.g. "checkpoint_epoch_11.pt"')
@@ -47,10 +47,10 @@ parser.add_argument('-rlr', '--reduce_lr', type=float, default=0.,
                     help='reduce initial (resumed) learning rate by this factor.')
 parser.add_argument('-op', '--optimizer', default='adamax',
                     help='supported optimizer: adamax, sgd')
-parser.add_argument('-gc', '--grad_clipping', type=float, default=10)
+parser.add_argument('-gc', '--grad_clipping', type=float, default=20)
 parser.add_argument('-wd', '--weight_decay', type=float, default=0)
-parser.add_argument('-lr', '--learning_rate', type=float, default=0.1,
-                    help='only applied to SGD.')
+parser.add_argument('-lr', '--learning_rate', type=float, default=0.002,
+                    help='learning rate which is applied to SGD/Adamax.')
 parser.add_argument('-mm', '--momentum', type=float, default=0.9,
                     help='only applied to SGD.')
 parser.add_argument('-tp', '--tune_partial', type=int, default=1000,
@@ -61,8 +61,8 @@ parser.add_argument('--rnn_padding', action='store_true',
                     help='perform rnn padding (much slower but more accurate).')
 # model
 parser.add_argument('--question_merge', default='self_attn')
-parser.add_argument('--doc_layers', type=int, default=3)
-parser.add_argument('--question_layers', type=int, default=3)
+parser.add_argument('--doc_layers', type=int, default=5)
+parser.add_argument('--question_layers', type=int, default=5)
 parser.add_argument('--hidden_size', type=int, default=128)
 parser.add_argument('--num_features', type=int, default=4)
 parser.add_argument('--pos', type=str2bool, nargs='?', const=True, default=True,
@@ -72,13 +72,13 @@ parser.add_argument('--ner', type=str2bool, nargs='?', const=True, default=True,
 parser.add_argument('--use_qemb', type=str2bool, nargs='?', const=True, default=True)
 parser.add_argument('--concat_rnn_layers', type=str2bool, nargs='?',
                     const=True, default=True)
-parser.add_argument('--dropout_emb', type=float, default=0.4)
-parser.add_argument('--dropout_rnn', type=float, default=0.4)
+parser.add_argument('--dropout_emb', type=float, default=0.5)
+parser.add_argument('--dropout_rnn', type=float, default=0.2)
 parser.add_argument('--dropout_rnn_output', type=str2bool, nargs='?',
                     const=True, default=True)
 parser.add_argument('--max_len', type=int, default=15)
-parser.add_argument('--rnn_type', default='lstm',
-                    help='supported types: rnn, gru, lstm')
+parser.add_argument('--rnn_type', default='sru',
+                    help='supported types: rnn, gru, lstm, sru')
 parser.add_argument('--parallel', action='store_true',
                     help='Use data parallel (split across gpus)')
 args = parser.parse_args()

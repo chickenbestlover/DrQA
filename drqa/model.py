@@ -14,6 +14,7 @@ import logging
 from torch.autograd import Variable
 from .utils import AverageMeter
 from .rnn_reader import RnnDocReader
+#from .rnn_reader_dense import RnnDocReader
 
 # Modification:
 #   - change the logger name
@@ -57,7 +58,7 @@ class DocReaderModel(object):
                                        weight_decay=opt['weight_decay'],nesterov=True)
             self.scheduler = lr_scheduler.StepLR(self.optimizer,step_size=20,gamma=0.1)
         elif opt['optimizer'] == 'adamax':
-            self.optimizer = optim.Adamax(parameters,
+            self.optimizer = optim.Adamax(parameters, opt['learning_rate'],
                                           weight_decay=opt['weight_decay'])
         else:
             raise RuntimeError('Unsupported optimizer: %s' % opt['optimizer'])
