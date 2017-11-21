@@ -6,7 +6,7 @@
 import torch
 import torch.nn as nn
 from . import layers
-import sru.cuda_functional as MF
+import cuda_functional as MF
 # Modification: add 'pos' and 'ner' features.
 # Origin: https://github.com/facebookresearch/ParlAI/tree/master/parlai/agents/drqa
 

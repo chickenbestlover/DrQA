@@ -14,7 +14,7 @@ from torch.autograd import Variable
 # ------------------------------------------------------------------------------
 # Modules
 # ------------------------------------------------------------------------------
-import sru.cuda_functional as MF
+import cuda_functional as MF
 
 
 class StackedBRNN(nn.Module):

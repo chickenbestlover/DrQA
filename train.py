@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser(
 # system
 parser.add_argument('--log_file', default='output.log',
                     help='path for log file.')
-parser.add_argument('--log_per_updates', type=int, default=100,
+parser.add_argument('--log_per_updates', type=int, default=1000,
                     help='log model loss per x updates (mini-batches).')
 parser.add_argument('--data_file', help='path to preprocessed data file.',
                     default='SQuAD/data.msgpack')
@@ -36,8 +36,8 @@ parser.add_argument("--cuda", type=str2bool, nargs='?',
                     const=True, default=torch.cuda.is_available(),
                     help='whether to use GPU acceleration.')
 # training
-parser.add_argument('-e', '--epochs', type=int, default=60)
-parser.add_argument('-bs', '--batch_size', type=int, default=128)
+parser.add_argument('-e', '--epochs', type=int, default=80)
+parser.add_argument('-bs', '--batch_size', type=int, default=32)
 parser.add_argument('-rs', '--resume', default='',
                     help='previous model file name (in `model_dir`). '
                          'e.g. "checkpoint_epoch_11.pt"')
@@ -49,7 +49,7 @@ parser.add_argument('-op', '--optimizer', default='adamax',
                     help='supported optimizer: adamax, sgd')
 parser.add_argument('-gc', '--grad_clipping', type=float, default=20)
 parser.add_argument('-wd', '--weight_decay', type=float, default=0)
-parser.add_argument('-lr', '--learning_rate', type=float, default=0.002,
+parser.add_argument('-lr', '--learning_rate', type=float, default=0.001,
                     help='learning rate which is applied to SGD/Adamax.')
 parser.add_argument('-mm', '--momentum', type=float, default=0.9,
                     help='only applied to SGD.')
