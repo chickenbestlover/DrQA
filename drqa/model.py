@@ -38,7 +38,11 @@ class DocReaderModel(object):
 
         # Building network.
         self.network = RnnDocReader(opt, embedding=embedding)
+
+
         if state_dict:
+            if opt['parallel']:
+                self.parallelize()
             new_state = set(self.network.state_dict().keys())
             for k in list(state_dict['network'].keys()):
                 if k not in new_state:
@@ -170,5 +174,6 @@ class DocReaderModel(object):
         """Use data parallel to copy the model across several gpus.
         This will take all gpus visible with CUDA_VISIBLE_DEVICES.
         """
-        self.parallel = True
-        self.network = torch.nn.DataParallel(self.network)
+        if not self.parallel:
+            self.parallel = True
+            self.network = torch.nn.DataParallel(self.network)
