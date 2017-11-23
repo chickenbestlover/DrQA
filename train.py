@@ -22,7 +22,7 @@ parser.add_argument('--log_file', default='output.log',
                     help='path for log file.')
 parser.add_argument('--log_per_updates', type=int, default=1000,
                     help='log model loss per x updates (mini-batches).')
-parser.add_argument('--data_file', default='SQuAD_/data.msgpack',
+parser.add_argument('--data_file', default='SQuAD/data.msgpack',
                     help='path to preprocessed data file.')
 parser.add_argument('--model_dir', default='models',
                     help='path to store saved models.')
@@ -36,7 +36,7 @@ parser.add_argument("--cuda", type=str2bool, nargs='?',
                     const=True, default=torch.cuda.is_available(),
                     help='whether to use GPU acceleration.')
 # training
-parser.add_argument('-e', '--epochs', type=int, default=50)
+parser.add_argument('-e', '--epochs', type=int, default=80)
 parser.add_argument('-bs', '--batch_size', type=int, default=32)
 parser.add_argument('-rs', '--resume', default='',
                     help='previous model file name (in `model_dir`). '
@@ -196,7 +196,7 @@ def lr_decay(optimizer, lr_decay):
 
 
 def load_data(opt):
-    with open('SQuAD_/meta.msgpack', 'rb') as f:
+    with open('SQuAD/meta.msgpack', 'rb') as f:
         meta = msgpack.load(f, encoding='utf8')
     embedding = torch.Tensor(meta['embedding'])
     opt['pretrained_words'] = True
@@ -206,8 +206,8 @@ def load_data(opt):
         embedding[1] = torch.normal(means=torch.zeros(opt['embedding_dim']), std=1.)
     with open(args.data_file, 'rb') as f:
         data = msgpack.load(f, encoding='utf8')
-    train_orig = pd.read_csv('SQuAD_/train.csv')
-    dev_orig = pd.read_csv('SQuAD_/dev.csv')
+    train_orig = pd.read_csv('SQuAD/train.csv')
+    dev_orig = pd.read_csv('SQuAD/dev.csv')
     train = list(zip(
         data['trn_context_ids'],
         data['trn_context_features'],
