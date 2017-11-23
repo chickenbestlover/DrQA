@@ -175,7 +175,7 @@ def main():
             for batch in batches:
                 predictions.extend(model.predict(batch))
             em, f1 = score(predictions, dev_y)
-            log.warn("dev EM: {} F1: {}".format(em, f1))
+            log.warning("dev EM: {} F1: {}".format(em, f1))
         # save
         if not args.save_last_only or epoch == epoch_0 + args.epochs - 1:
             model_file = os.path.join(model_dir, 'checkpoint_epoch_{}.pt'.format(epoch))
