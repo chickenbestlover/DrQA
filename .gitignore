@@ -3,5 +3,5 @@
 SQuAD/
 models/
 glove/
-drqa/__pycache__/
+drqa/__pycache__/*
 .idea/

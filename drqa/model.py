@@ -5,8 +5,6 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 import torch
 import torch.optim as optim
-import torch.optim.lr_scheduler as lr_scheduler
-
 import torch.nn.functional as F
 import numpy as np
 import logging
@@ -14,7 +12,6 @@ import logging
 from torch.autograd import Variable
 from .utils import AverageMeter
 from .rnn_reader import RnnDocReader
-#from .rnn_reader_dense import RnnDocReader
 
 # Modification:
 #   - change the logger name
@@ -35,15 +32,10 @@ class DocReaderModel(object):
         self.opt = opt
         self.updates = state_dict['updates'] if state_dict else 0
         self.train_loss = AverageMeter()
-        self.parallel = False
 
         # Building network.
         self.network = RnnDocReader(opt, embedding=embedding)
-
-
         if state_dict:
-            if opt['parallel']:
-                self.parallelize()
             new_state = set(self.network.state_dict().keys())
             for k in list(state_dict['network'].keys()):
                 if k not in new_state:
@@ -55,8 +47,7 @@ class DocReaderModel(object):
         if opt['optimizer'] == 'sgd':
             self.optimizer = optim.SGD(parameters, opt['learning_rate'],
                                        momentum=opt['momentum'],
-                                       weight_decay=opt['weight_decay'],nesterov=True)
-            self.scheduler = lr_scheduler.StepLR(self.optimizer,step_size=20,gamma=0.1)
+                                       weight_decay=opt['weight_decay'])
         elif opt['optimizer'] == 'adamax':
             self.optimizer = optim.Adamax(parameters, opt['learning_rate'],
                                           weight_decay=opt['weight_decay'])
@@ -64,8 +55,12 @@ class DocReaderModel(object):
             raise RuntimeError('Unsupported optimizer: %s' % opt['optimizer'])
         if state_dict:
             self.optimizer.load_state_dict(state_dict['optimizer'])
+	
+        num_params = sum(p.data.numel() for p in parameters
+            if p.data.data_ptr() != self.network.embedding.weight.data.data_ptr())
+        print ("{} parameters".format(num_params))
 
-    def update(self, ex,epoch):
+    def update(self, ex):
         # Train mode
         self.network.train()
 
@@ -95,11 +90,7 @@ class DocReaderModel(object):
                                       self.opt['grad_clipping'])
 
         # Update parameters
-        if self.opt['optimizer'] == 'sgd':
-            self.scheduler.step(epoch=epoch)
-            self.optimizer.step()
-        else:
-            self.optimizer.step()
+        self.optimizer.step()
         self.updates += 1
 
         # Reset any partially fixed parameters (e.g. rare words)
@@ -142,15 +133,9 @@ class DocReaderModel(object):
         # Reset fixed embeddings to original value
         if self.opt['tune_partial'] > 0:
             offset = self.opt['tune_partial'] + 2
-
-            if self.parallel:
-                if offset < self.network.module.embedding.weight.data.size(0):
-                    self.network.module.embedding.weight.data[offset:] \
-                        = self.network.module.fixed_embedding
-            else:
-                if offset < self.network.embedding.weight.data.size(0):
-                    self.network.embedding.weight.data[offset:] \
-                        = self.network.fixed_embedding
+            if offset < self.network.embedding.weight.data.size(0):
+                self.network.embedding.weight.data[offset:] \
+                    = self.network.fixed_embedding
 
     def save(self, filename, epoch):
         params = {
@@ -170,11 +155,3 @@ class DocReaderModel(object):
 
     def cuda(self):
         self.network.cuda()
-
-    def parallelize(self):
-        """Use data parallel to copy the model across several gpus.
-        This will take all gpus visible with CUDA_VISIBLE_DEVICES.
-        """
-        if not self.parallel:
-            self.parallel = True
-            self.network = torch.nn.DataParallel(self.network)
