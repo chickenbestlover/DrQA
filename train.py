@@ -85,8 +85,13 @@ parser.add_argument('--dropout_rnn', type=float, default=0.2)
 parser.add_argument('--dropout_rnn_output', type=str2bool, nargs='?',
                     const=True, default=True)
 parser.add_argument('--max_len', type=int, default=15)
-parser.add_argument('--rnn_type', default='lstm',
-                    help='supported types: rnn, gru, lstm')
+parser.add_argument('--rnn_type', default='sru',
+                    help='supported types: sru')
+parser.add_argument('--reduction_ratio', default='6',
+                    help='reduction ratio need by 1by1-convolution')
+parser.add_argument('--num_objects', default='25',
+                    help='#of objects for relational reasoning')
+
 
 args = parser.parse_args()
 

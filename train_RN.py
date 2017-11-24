@@ -11,7 +11,7 @@ from collections import Counter
 import torch
 import msgpack
 import pandas as pd
-from drqa.model import DocReaderModel
+from drqa.model_RN import DocReaderModel
 from drqa.utils import str2bool
 
 parser = argparse.ArgumentParser(
@@ -87,6 +87,10 @@ parser.add_argument('--dropout_rnn_output', type=str2bool, nargs='?',
 parser.add_argument('--max_len', type=int, default=15)
 parser.add_argument('--rnn_type', default='lstm',
                     help='supported types: rnn, gru, lstm')
+parser.add_argument('--num_objects', type=int, default=30,
+                    help='The number of objects needed for relationNet.')
+parser.add_argument('--reduction_ratio', type=int, default=2,
+                    help='reduction_ratio')
 
 args = parser.parse_args()
 
@@ -157,6 +161,7 @@ def main():
         # train
         batches = BatchGen(train, batch_size=args.batch_size, gpu=args.cuda)
         start = datetime.now()
+
         for i, batch in enumerate(batches):
             model.update(batch)
             if i % args.log_per_updates == 0:

@@ -209,6 +209,7 @@ class BilinearSeqAttn(nn.Module):
         x_mask = batch * len
         """
         Wy = self.linear(y) if self.linear is not None else y
+        #if self.eval(): print('Wy:', Wy.size())
         xWy = x.bmm(Wy.unsqueeze(2)).squeeze(2)
         xWy.data.masked_fill_(x_mask.data, -float('inf'))
         if self.training:
@@ -257,9 +258,9 @@ class doc_LinearSeqAttn(nn.Module):
         """
         x_flat = x.contiguous().view(-1, x.size(-1))
         scores = self.linear(x_flat).view(x.size(0), x.size(1), self.output_size)
-        x_mask = x_mask.unsqueeze(2).expand_as(scores)
+        #x_mask = x_mask.unsqueeze(2).expand_as(scores)
 
-        scores.data.masked_fill_(x_mask.data, -float('inf'))
+        #scores.data.masked_fill_(x_mask.data, -float('inf'))
         alpha = F.softmax(scores)
         return alpha
 
@@ -314,15 +315,19 @@ class convEncoder(nn.Module):
         :return: batch * output_len * out_channels
         '''
         out= F.relu(self.maxPool(self.conv1(torch.transpose(x, 1, 2))))
-        print('out: ', out.size())
-        out= torch.transpose(F.relu(self.maxPool(self.conv1(x))), 1, 2)
+        #print('out: ', out.size())
+        out= torch.transpose(F.relu(self.maxPool(self.conv2(out))), 1, 2)
         return out
 
 class RelationNetwork(nn.Module):
     '''
     RelationNet
     '''
-    def __init__(self,hidden_size, output_size):
+    def __init__(self,num_objects,hidden_size, output_size):
+        super(RelationNetwork, self).__init__()
+        self.numb_objects = num_objects
+        self.hidden_size = hidden_size
+        self.output_size = output_size
         self.g_fc1 = torch.nn.Linear(hidden_size, hidden_size)
         self.g_fc2 = torch.nn.Linear(hidden_size, hidden_size)
         self.g_fc3 = torch.nn.Linear(hidden_size, hidden_size)
@@ -336,21 +341,21 @@ class RelationNetwork(nn.Module):
         '''
         # Concatenate all available relations
         x_i = doc_hiddens.unsqueeze(1)
-        x_i = x_i.repeat(1, 25, 1, 1)
+        x_i = x_i.repeat(1, self.numb_objects, 1, 1)
         x_j = doc_hiddens.unsqueeze(2)
-        x_j = x_j.repeat(1, 1, 25, 1)
-        q = question_hidden.unsqueeze(1).repeat(1, 25, 25, 1)
+        x_j = x_j.repeat(1, 1, self.numb_objects, 1)
+        q = question_hidden.unsqueeze(1).unsqueeze(1).repeat(1, self.numb_objects, self.numb_objects, 1)
         relations = torch.cat([x_i, x_j, q], 3)
-        print('relations       :', relations.size())
+        #print('relations       :', relations.size())
         x_r = relations.view(-1,x_i.size(3)+x_j.size(3)+q.size(3))
-
+        #print('x_r:',x_r.size())
         x_r = F.relu(self.g_fc1(x_r))
         x_r = F.relu(self.g_fc2(x_r))
         x_r = F.relu(self.g_fc3(x_r))
         x_r = F.relu(self.g_fc4(x_r))
 
         x_g = x_r.view(relations.size(0), relations.size(1) * relations.size(2), -1)
-        x_g = x_g.sum(1).squeeze()
+        x_g = x_g.sum(1).squeeze(1)
 
         return x_g
 # ------------------------------------------------------------------------------
