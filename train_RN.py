@@ -49,7 +49,7 @@ parser.add_argument('-op', '--optimizer', default='adamax',
                     help='supported optimizer: adamax, sgd')
 parser.add_argument('-gc', '--grad_clipping', type=float, default=20)
 parser.add_argument('-wd', '--weight_decay', type=float, default=0)
-parser.add_argument('-lr', '--learning_rate', type=float, default=0.004,
+parser.add_argument('-lr', '--learning_rate', type=float, default=0.001,
                     help='only applied to SGD.')
 parser.add_argument('-mm', '--momentum', type=float, default=0,
                     help='only applied to SGD.')
@@ -87,9 +87,9 @@ parser.add_argument('--dropout_rnn_output', type=str2bool, nargs='?',
 parser.add_argument('--max_len', type=int, default=15)
 parser.add_argument('--rnn_type', default='lstm',
                     help='supported types: rnn, gru, lstm')
-parser.add_argument('--num_objects', type=int, default=30,
+parser.add_argument('--num_objects', type=int, default=50,
                     help='The number of objects needed for relationNet.')
-parser.add_argument('--reduction_ratio', type=int, default=2,
+parser.add_argument('--reduction_ratio', type=int, default=1,
                     help='reduction_ratio')
 
 args = parser.parse_args()

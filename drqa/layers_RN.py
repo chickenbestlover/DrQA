@@ -258,9 +258,9 @@ class doc_LinearSeqAttn(nn.Module):
         """
         x_flat = x.contiguous().view(-1, x.size(-1))
         scores = self.linear(x_flat).view(x.size(0), x.size(1), self.output_size)
-        #x_mask = x_mask.unsqueeze(2).expand_as(scores)
+        x_mask = x_mask.unsqueeze(2).expand_as(scores)
 
-        #scores.data.masked_fill_(x_mask.data, -float('inf'))
+        scores.data.masked_fill_(x_mask.data, -float('inf'))
         alpha = F.softmax(scores)
         return alpha
 
