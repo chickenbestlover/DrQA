@@ -329,9 +329,13 @@ class RelationNetwork(nn.Module):
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.g_fc1 = torch.nn.Linear(hidden_size, hidden_size)
-        #self.g_fc2 = torch.nn.Linear(hidden_size, hidden_size)
-        #self.g_fc3 = torch.nn.Linear(hidden_size, hidden_size)
+        self.g_bn1 = torch.nn.BatchNorm1d(num_features=hidden_size)
+        self.g_fc2 = torch.nn.Linear(hidden_size, hidden_size)
+        self.g_bn2 = torch.nn.BatchNorm1d(num_features=hidden_size)
+        self.g_fc3 = torch.nn.Linear(hidden_size, hidden_size)
+        self.g_bn3 = torch.nn.BatchNorm1d(num_features=hidden_size)
         self.g_fc4 = torch.nn.Linear(hidden_size, output_size)
+        self.g_bn4 = torch.nn.BatchNorm1d(num_features=output_size)
     def forward(self,doc_hiddens, question_hidden):
         '''
 
@@ -349,10 +353,14 @@ class RelationNetwork(nn.Module):
         #print('relations       :', relations.size())
         x_r = relations.view(-1,x_i.size(3)+x_j.size(3)+q.size(3))
         #print('x_r:',x_r.size())
-        x_r = F.relu(self.g_fc1(x_r))
-        #x_r = F.relu(self.g_fc2(x_r))
-        #x_r = F.relu(self.g_fc3(x_r))
-        x_r = F.relu(self.g_fc4(x_r))
+        res1 = x_r.clone()
+        x_r = F.relu((self.g_fc1(x_r))) + res1
+        res2 = x_r.clone()
+        x_r = F.relu((self.g_fc2(x_r))) + res2
+        res3 = x_r.clone()
+        x_r = F.relu((self.g_fc3(x_r))) + res3
+
+        x_r = F.relu((self.g_fc4(x_r)))
 
         x_g = x_r.view(relations.size(0), relations.size(1) * relations.size(2), -1)
         x_g = x_g.sum(1).squeeze(1)
