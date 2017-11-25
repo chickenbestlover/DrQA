@@ -183,7 +183,7 @@ def main():
             log.warning("dev EM: {} F1: {}".format(em, f1))
         # save
         if not args.save_last_only or epoch == epoch_0 + args.epochs - 1:
-            model_file = os.path.join(model_dir, 'checkpoint_epoch_{}.pt'.format(epoch))
+            model_file = os.path.join(model_dir, 'checkpoint_epoch.pt')
             model.save(model_file, epoch)
             if f1 > best_val_score:
                 best_val_score = f1

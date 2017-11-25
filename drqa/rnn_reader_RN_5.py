@@ -102,12 +102,12 @@ class RnnDocReader(nn.Module):
         num_ojbects = opt['num_objects']
         reduction_ratio = opt['reduction_ratio']
         self.doc_layerNorm1 = layers.LayerNorm(d_hid=doc_hidden_size)
-        #self.doc_1by1conv = layers.Conv1by1DimReduce(in_channels=doc_hidden_size,out_channels=doc_hidden_size//reduction_ratio)
+        self.doc_1by1conv = layers.Conv1by1DimReduce(in_channels=doc_hidden_size,out_channels=doc_hidden_size//reduction_ratio)
         #self.doc_layerNorm2 = layers.LayerNorm(d_hid=doc_hidden_size//reduction_ratio)
         #self.doc_conv_encoder = layers.convEncoder(in_channels=doc_hidden_size//reduction_ratio,out_channels=doc_hidden_size//reduction_ratio)
         #self.doc_self_attn = layers.doc_LinearSeqAttn(input_size=doc_hidden_size//reduction_ratio,output_size=num_ojbects)
         #self.doc_layerNorm3 = layers.LayerNorm(d_hid=doc_hidden_size // reduction_ratio)
-        #self.question_1by1conv = layers.Conv1by1DimReduce(in_channels=question_hidden_size, out_channels=question_hidden_size// reduction_ratio)
+        self.question_1by1conv = layers.Conv1by1DimReduce(in_channels=question_hidden_size, out_channels=question_hidden_size// reduction_ratio)
         self.question_layerNorm1 = layers.LayerNorm(d_hid=question_hidden_size // reduction_ratio)
 
         # Question merging
@@ -117,7 +117,7 @@ class RnnDocReader(nn.Module):
             self.self_attn = layers.LinearSeqAttn(question_hidden_size//reduction_ratio)
         self.question_layerNorm2 = layers.LayerNorm(d_hid=question_hidden_size // reduction_ratio)
 
-        #self.relationNet = layers.RelationNetwork(num_objects=num_ojbects, hidden_size=3 * doc_hidden_size//reduction_ratio,output_size=doc_hidden_size//reduction_ratio)
+        self.relationNet = layers.RelationNetwork(num_objects=num_ojbects, hidden_size=3 * doc_hidden_size//reduction_ratio,output_size=doc_hidden_size//reduction_ratio)
 
         # Bilinear attention for span start/end
         self.start_attn = layers.BilinearSeqAttn(
@@ -170,27 +170,27 @@ class RnnDocReader(nn.Module):
 
         # Encode document with RNN
         doc_hiddens = self.doc_rnn(drnn_input, x1_mask)
-        doc_hiddens = self.doc_layerNorm1(doc_hiddens.view(-1,doc_hiddens.size(2))).view_as(doc_hiddens)
+        #doc_hiddens = self.doc_layerNorm1(doc_hiddens.view(-1,doc_hiddens.size(2))).view_as(doc_hiddens)
         #if self.eval(): print('doc_hiddens:',doc_hiddens.size())
-        #doc_hiddens = self.doc_1by1conv(doc_hiddens)
+        doc_hiddens = self.doc_1by1conv(doc_hiddens)
         #if self.eval(): print('doc_hiddens:', doc_hiddens.size())
         #doc_hiddens_compact = self.doc_conv_encoder(doc_hiddens)
         #if self.eval(): print('doc_hiddens_compact:', doc_hiddens_compact.size())
 
         # doc_merge_weights = self.doc_self_attn(doc_hiddens_compact,x1_mask)
-        #doc_merge_weights = self.doc_self_attn(doc_hiddens,x1_mask)
+        doc_merge_weights = self.doc_self_attn(doc_hiddens,x1_mask)
 
         #if self.eval(): print('doc_merge_weights:', doc_merge_weights.size())
 
         #doc_hiddens_compact = torch.bmm(doc_merge_weights.transpose(1, 2), doc_hiddens_compact)
-        #doc_hiddens_compact = torch.bmm(doc_merge_weights.transpose(1, 2), doc_hiddens)
+        doc_hiddens_compact = torch.bmm(doc_merge_weights.transpose(1, 2), doc_hiddens)
 
         #if self.eval(): print('doc_hiddens_compact:', doc_hiddens_compact.size())
 
         # Encode question with RNN + merge hiddens
         question_hiddens = self.question_rnn(x2_emb, x2_mask)
-        question_hiddens = self.question_layerNorm1(question_hiddens.view(-1, question_hiddens.size(2))).view_as(question_hiddens)
-        #question_hiddens = self.question_1by1conv(question_hiddens)
+        #question_hiddens = self.question_layerNorm1(question_hiddens.view(-1, question_hiddens.size(2))).view_as(question_hiddens)
+        question_hiddens = self.question_1by1conv(question_hiddens)
         #if self.eval(): print('question_hiddens:', question_hiddens.size())
 
         if self.opt['question_merge'] == 'avg':
@@ -198,17 +198,17 @@ class RnnDocReader(nn.Module):
         elif self.opt['question_merge'] == 'self_attn':
             q_merge_weights = self.self_attn(question_hiddens, x2_mask)
         question_hidden = layers.weighted_avg(question_hiddens, q_merge_weights)
-        question_hidden = self.question_layerNorm2(question_hidden)
+        #question_hidden = self.question_layerNorm2(question_hidden)
         #if self.eval(): print('question_hidden:', question_hidden.size())
 
         '''
         Relation Network
         '''
-        #doc_question_hidden = self.relationNet(doc_hiddens_compact,question_hidden)
+        doc_question_hidden = self.relationNet(doc_hiddens_compact,question_hidden)
         #if self.eval(): print('doc_question_hidden:', doc_question_hidden.size())
 
 
         # Predict start and end positions
-        start_scores = self.start_attn(doc_hiddens, question_hidden, x1_mask)
-        end_scores = self.end_attn(doc_hiddens, question_hidden, x1_mask)
+        start_scores = self.start_attn(doc_hiddens, doc_question_hidden, x1_mask)
+        end_scores = self.end_attn(doc_hiddens, doc_question_hidden, x1_mask)
         return start_scores, end_scores
