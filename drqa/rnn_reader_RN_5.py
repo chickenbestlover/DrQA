@@ -105,7 +105,7 @@ class RnnDocReader(nn.Module):
         self.doc_1by1conv = layers.Conv1by1DimReduce(in_channels=doc_hidden_size,out_channels=doc_hidden_size//reduction_ratio)
         #self.doc_layerNorm2 = layers.LayerNorm(d_hid=doc_hidden_size//reduction_ratio)
         #self.doc_conv_encoder = layers.convEncoder(in_channels=doc_hidden_size//reduction_ratio,out_channels=doc_hidden_size//reduction_ratio)
-        #self.doc_self_attn = layers.doc_LinearSeqAttn(input_size=doc_hidden_size//reduction_ratio,output_size=num_ojbects)
+        self.doc_self_attn = layers.doc_LinearSeqAttn(input_size=doc_hidden_size//reduction_ratio,output_size=num_ojbects)
         #self.doc_layerNorm3 = layers.LayerNorm(d_hid=doc_hidden_size // reduction_ratio)
         self.question_1by1conv = layers.Conv1by1DimReduce(in_channels=question_hidden_size, out_channels=question_hidden_size// reduction_ratio)
         self.question_layerNorm1 = layers.LayerNorm(d_hid=question_hidden_size // reduction_ratio)
