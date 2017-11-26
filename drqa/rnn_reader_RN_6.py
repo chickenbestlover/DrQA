@@ -132,11 +132,11 @@ class RnnDocReader(nn.Module):
 
         # Bilinear attention for span start/end
         self.start_attn = layers.BilinearSeqAttn(
-            doc_hidden_size,
+            doc_hidden_size//reduction_ratio,
             question_hidden_size//reduction_ratio,
         )
         self.end_attn = layers.BilinearSeqAttn(
-            doc_hidden_size,
+            doc_hidden_size//reduction_ratio,
             question_hidden_size//reduction_ratio,
         )
 
