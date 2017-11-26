@@ -323,9 +323,9 @@ class RelationNetwork(nn.Module):
     '''
     RelationNet
     '''
-    def __init__(self,num_objects,hidden_size, output_size):
+    def __init__(self,hidden_size, output_size):
         super(RelationNetwork, self).__init__()
-        self.numb_objects = num_objects
+
         self.hidden_size = hidden_size
         self.output_size = output_size
         self.g_fc1 = torch.nn.Linear(hidden_size, hidden_size)
@@ -351,11 +351,12 @@ class RelationNetwork(nn.Module):
         :return: batch * output_size
         '''
         # Concatenate all available relations
+        num_objects = doc_hiddens.size(1)
         x_i = doc_hiddens.unsqueeze(1)
-        x_i = x_i.repeat(1, self.numb_objects, 1, 1)
+        x_i = x_i.repeat(1, num_objects, 1, 1)
         x_j = doc_hiddens.unsqueeze(2)
-        x_j = x_j.repeat(1, 1, self.numb_objects, 1)
-        q = question_hidden.unsqueeze(1).unsqueeze(1).repeat(1, self.numb_objects, self.numb_objects, 1)
+        x_j = x_j.repeat(1, 1, num_objects, 1)
+        q = question_hidden.unsqueeze(1).unsqueeze(1).repeat(1, num_objects, num_objects, 1)
         relations = torch.cat([x_i, x_j, q], 3)
         #print('relations       :', relations.size())
         x_r = relations.view(-1,x_i.size(3)+x_j.size(3)+q.size(3))
