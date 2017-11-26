@@ -307,6 +307,9 @@ class convEncoder(nn.Module):
         super(convEncoder, self).__init__()
         self.conv1 = torch.nn.Conv1d(in_channels=in_channels, out_channels=in_channels, kernel_size=kernel_size, stride=stride, padding=padding)
         self.conv2 = torch.nn.Conv1d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.conv3 = torch.nn.Conv1d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size,
+                                     stride=stride, padding=padding)
+
         self.maxPool = torch.nn.MaxPool1d(kernel_size=2)
 
     def forward(self, x):
@@ -316,7 +319,9 @@ class convEncoder(nn.Module):
         '''
         out= F.relu(self.maxPool(self.conv1(torch.transpose(x, 1, 2))))
         #print('out: ', out.size())
-        out= torch.transpose(F.relu(self.maxPool(self.conv2(out))), 1, 2)
+
+        out= F.relu(self.maxPool(self.conv2(out)))
+        out= torch.transpose(F.relu(self.maxPool(self.conv3(out))), 1, 2)
         return out
 
 class RelationNetwork(nn.Module):
