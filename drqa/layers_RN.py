@@ -368,9 +368,9 @@ class RelationNetwork(nn.Module):
 
         self.hidden_size = hidden_size
         self.output_size = output_size
-        self.g_fc1 = torch.nn.Linear(hidden_size, hidden_size)
+        self.g_fc1 = torch.nn.Linear(hidden_size, output_size)
         #self.g_bn1 = torch.nn.BatchNorm1d(num_features=hidden_size)
-        self.ln1 = LayerNorm(d_hid=hidden_size)
+        self.ln1 = LayerNorm(d_hid=output_size)
         #self.g_fc2 = torch.nn.Linear(hidden_size, hidden_size)
         #self.g_bn2 = torch.nn.BatchNorm1d(num_features=hidden_size)
         #self.ln2 = LayerNorm(d_hid=hidden_size)
@@ -379,7 +379,7 @@ class RelationNetwork(nn.Module):
         #self.g_bn3 = torch.nn.BatchNorm1d(num_features=hidden_size)
         #self.ln3 = LayerNorm(d_hid=hidden_size)
 
-        self.g_fc4 = torch.nn.Linear(hidden_size, output_size)
+        self.g_fc4 = torch.nn.Linear(output_size, output_size)
         #self.g_bn4 = torch.nn.BatchNorm1d(num_features=output_size)
         self.ln4 = LayerNorm(d_hid=output_size)
 
