@@ -36,9 +36,9 @@ class RnnDocReader(nn.Module):
             if normalize_emb: normalize_emb_(embedding)
             self.embedding.weight.data = embedding
             if embedding_order:
-                self.embedding_order = nn.Embedding(num_embeddings=1000,embedding_dim=embedding.size(1),
+                self.embedding_order = nn.Embedding(num_embeddings=1000,embedding_dim=256,
                                                     padding_idx=padding_idx)
-                self.embedding_order.weight.data = layers.position_encoding_init(n_position=1000,d_pos_vec=embedding.size(1))
+                self.embedding_order.weight.data = layers.position_encoding_init(n_position=1000,d_pos_vec=256)
                 self.embedding_order.weight.requires_grad= False
             if opt['fix_embeddings']:
                 assert opt['tune_partial'] == 0
@@ -108,7 +108,7 @@ class RnnDocReader(nn.Module):
             raise NotImplementedError('question_merge = %s' % opt['question_merge'])
         if opt['question_merge'] == 'self_attn':
             self.self_attn = layers.LinearSeqAttn(question_hidden_size)
-        self.relationNet = layers.RelationNetwork(hidden_size=3 * doc_hidden_size, output_size=doc_hidden_size)
+        self.relationNet = layers.RelationNetwork(hidden_size=2*3 * doc_hidden_size, output_size=doc_hidden_size)
         # doc_attention for maxpooling
         self.doc_attn = layers.BilinearSeqAttn_norm(doc_hidden_size,question_hidden_size)
 
@@ -134,9 +134,9 @@ class RnnDocReader(nn.Module):
         """
         # Embed both document and question
         x1_emb = self.embedding(x1)
-        x1_emb += self.embedding_order(x1_order)
+        x1_emb_order = self.embedding_order(x1_order)
         x2_emb = self.embedding(x2)
-        x2_emb += self.embedding_order(x2_order)
+        #x2_emb += self.embedding_order(x2_order)
 
         if self.opt['dropout_emb'] > 0:
             x1_emb = nn.functional.dropout(x1_emb, p=self.opt['dropout_emb'],
@@ -165,7 +165,6 @@ class RnnDocReader(nn.Module):
 
         # Encode document with RNN
         doc_hiddens = self.doc_rnn(drnn_input, x1_mask)
-
         # Encode question with RNN + merge hiddens
         question_hiddens = self.question_rnn(x2_emb, x2_mask)
         if self.opt['question_merge'] == 'avg':
@@ -179,6 +178,7 @@ class RnnDocReader(nn.Module):
         idx = layers.kmax_indice(x = doc_attn_scores,dim=1,k=self.num_object)
         #print('idx:',idx.size())
         #print('doc_hiddens:',doc_hiddens.size())
+        doc_hiddens = torch.cat([doc_hiddens, x1_emb_order], dim=2)
         doc_hiddens_compact = layers.indice_pooling(doc_hiddens, indices=idx)
 
 
