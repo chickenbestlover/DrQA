@@ -108,7 +108,7 @@ class RnnDocReader(nn.Module):
             raise NotImplementedError('question_merge = %s' % opt['question_merge'])
         if opt['question_merge'] == 'self_attn':
             self.self_attn = layers.LinearSeqAttn(question_hidden_size)
-        self.relationNet = layers.RelationNetwork(hidden_size=2*3 * doc_hidden_size, output_size=doc_hidden_size)
+        self.relationNet = layers.RelationNetwork(hidden_size=5 * doc_hidden_size, output_size=doc_hidden_size)
         # doc_attention for maxpooling
         self.doc_attn = layers.BilinearSeqAttn_norm(doc_hidden_size,question_hidden_size)
 
