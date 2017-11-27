@@ -13,7 +13,7 @@ import msgpack
 import pandas as pd
 from drqa.model_RN import DocReaderModel
 from drqa.utils import str2bool
-
+import numpy as np
 parser = argparse.ArgumentParser(
     description='Train a Document Reader model.'
 )
@@ -272,9 +272,11 @@ class BatchGen:
 
             context_len = max(len(x) for x in batch[0])
             context_id = torch.LongTensor(batch_size, context_len).fill_(0)
+            context_order = torch.LongTensor(batch_size,context_len).fill_(0)
+
             for i, doc in enumerate(batch[0]):
                 context_id[i, :len(doc)] = torch.LongTensor(doc)
-
+                context_order[i,:len(doc)] = torch.from_numpy(np.arange(1,len(doc)+1))
             feature_len = len(batch[1][0][0])
             context_feature = torch.Tensor(batch_size, context_len, feature_len).fill_(0)
             for i, doc in enumerate(batch[1]):
@@ -290,8 +292,10 @@ class BatchGen:
                 context_ent[i, :len(doc)] = torch.LongTensor(doc)
             question_len = max(len(x) for x in batch[4])
             question_id = torch.LongTensor(batch_size, question_len).fill_(0)
+            question_order = torch.LongTensor(batch_size,question_len).fill_(0)
             for i, doc in enumerate(batch[4]):
                 question_id[i, :len(doc)] = torch.LongTensor(doc)
+                question_order[i,:len(doc)] = torch.from_numpy(np.arange(1,len(doc)+1))
 
             context_mask = torch.eq(context_id, 0)
             question_mask = torch.eq(question_id, 0)
@@ -308,12 +312,15 @@ class BatchGen:
                 context_mask = context_mask.pin_memory()
                 question_id = question_id.pin_memory()
                 question_mask = question_mask.pin_memory()
+                context_order = context_order.pin_memory()
+                question_order = question_order.pin_memory()
+
             if self.eval:
                 yield (context_id, context_feature, context_tag, context_ent, context_mask,
-                       question_id, question_mask, text, span)
+                       question_id, question_mask, context_order, question_order, text, span)
             else:
                 yield (context_id, context_feature, context_tag, context_ent, context_mask,
-                       question_id, question_mask, y_s, y_e, text, span)
+                       question_id, question_mask, context_order, question_order, y_s, y_e, text, span)
 
 
 def _normalize_answer(s):

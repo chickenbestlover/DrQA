@@ -15,6 +15,7 @@ from torch.autograd import Variable
 # ------------------------------------------------------------------------------
 
 import cuda_functional as MF
+import numpy as np
 
 class StackedBRNN(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers,
@@ -406,6 +407,18 @@ class LayerNorm(nn.Module):
         ln_out = ln_out.mul(self.a_2.expand_as(ln_out)) \
                  + self.b_2.expand_as(ln_out)
         return ln_out
+
+def position_encoding_init(n_position, d_pos_vec):
+    ''' Init the sinusoid position encoding table '''
+
+    # keep dim 0 for padding token position encoding zero vector
+    position_enc = np.array([
+                                [pos / np.power(10000, 2 * i / d_pos_vec) for i in range(d_pos_vec)]
+                                if pos != 0 else np.zeros(d_pos_vec) for pos in range(n_position)])
+
+    position_enc[1:, 0::2] = np.sin(position_enc[1:, 0::2])  # dim 2i
+    position_enc[1:, 1::2] = np.cos(position_enc[1:, 1::2])  # dim 2i+1
+    return torch.from_numpy(position_enc).type(torch.FloatTensor)
 
 
 # ------------------------------------------------------------------------------

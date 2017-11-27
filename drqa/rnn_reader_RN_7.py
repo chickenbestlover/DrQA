@@ -22,7 +22,7 @@ class RnnDocReader(nn.Module):
     """Network for the Document Reader module of DrQA."""
     RNN_TYPES = {'lstm': nn.LSTM, 'gru': nn.GRU, 'rnn': nn.RNN}
 
-    def __init__(self, opt, padding_idx=0, embedding=None, normalize_emb=False, embedding_order=True):
+    def __init__(self, opt, padding_idx=0, embedding=None, normalize_emb=False):
         super(RnnDocReader, self).__init__()
         # Store config
         self.opt = opt
@@ -35,10 +35,6 @@ class RnnDocReader(nn.Module):
                                           padding_idx=padding_idx)
             if normalize_emb: normalize_emb_(embedding)
             self.embedding.weight.data = embedding
-            if embedding_order:
-                self.embedding_order = nn.Embedding(num_embeddings=1000,embedding_dim=embedding.size(1),
-                                                    padding_idx=padding_idx)
-                self.embedding_order.weight.data = layers.position_encoding_init(n_position=1000,d_pos_vec=embedding.size(1))
 
             if opt['fix_embeddings']:
                 assert opt['tune_partial'] == 0
@@ -144,7 +140,7 @@ class RnnDocReader(nn.Module):
             question_hidden_size,
         )
 
-    def forward(self, x1, x1_f, x1_pos, x1_ner, x1_mask, x2, x2_mask,x1_order,x2_order):
+    def forward(self, x1, x1_f, x1_pos, x1_ner, x1_mask, x2, x2_mask):
         """Inputs:
         x1 = document word indices             [batch * len_d]
         x1_f = document word features indices  [batch * len_d * nfeat]
@@ -156,9 +152,7 @@ class RnnDocReader(nn.Module):
         """
         # Embed both document and question
         x1_emb = self.embedding(x1)
-        x1_emb += self.embedding_order(x1_order)
         x2_emb = self.embedding(x2)
-        x2_emb += self.embedding_order(x2_order)
 
         if self.opt['dropout_emb'] > 0:
             x1_emb = nn.functional.dropout(x1_emb, p=self.opt['dropout_emb'],
