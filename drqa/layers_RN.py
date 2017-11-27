@@ -400,9 +400,9 @@ class RelationNetwork(nn.Module):
         relations = torch.cat([x_i, x_j, q], 3)
         #print('relations       :', relations.size())
         x_r = relations.view(-1,x_i.size(3)+x_j.size(3)+q.size(3))
-        print('x_r:',x_r.size())
+        #print('x_r:',x_r.size())
         #res1 = x_r.clone()
-        print(self.g_fc1)
+        #print(self.g_fc1)
         x_r = F.relu((self.g_fc1(x_r)))# + res1
         x_r = self.ln1.forward(x_r)
         #res2 = x_r.clone()

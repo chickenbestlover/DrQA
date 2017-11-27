@@ -36,8 +36,8 @@ parser.add_argument("--cuda", type=str2bool, nargs='?',
                     const=True, default=torch.cuda.is_available(),
                     help='whether to use GPU acceleration.')
 # training
-parser.add_argument('-e', '--epochs', type=int, default=80)
-parser.add_argument('-bs', '--batch_size', type=int, default=64)
+parser.add_argument('-e', '--epochs', type=int, default=200)
+parser.add_argument('-bs', '--batch_size', type=int, default=32)
 parser.add_argument('-rs', '--resume', default='',
                     help='previous model file name (in `model_dir`). '
                          'e.g. "checkpoint_epoch_11.pt"')
@@ -61,8 +61,8 @@ parser.add_argument('--rnn_padding', action='store_true',
                     help='perform rnn padding (much slower but more accurate).')
 # model
 parser.add_argument('--question_merge', default='self_attn')
-parser.add_argument('--doc_layers', type=int, default=5)
-parser.add_argument('--question_layers', type=int, default=5)
+parser.add_argument('--doc_layers', type=int, default=3)
+parser.add_argument('--question_layers', type=int, default=3)
 parser.add_argument('--hidden_size', type=int, default=128)
 parser.add_argument('--num_features', type=int, default=4)
 parser.add_argument('--pos', type=str2bool, nargs='?', const=True, default=True,
@@ -87,7 +87,7 @@ parser.add_argument('--dropout_rnn_output', type=str2bool, nargs='?',
 parser.add_argument('--max_len', type=int, default=15)
 parser.add_argument('--rnn_type', default='lstm',
                     help='supported types: rnn, gru, lstm')
-parser.add_argument('--num_objects', type=int, default=25,
+parser.add_argument('--num_objects', type=int, default=6,
                     help='The number of objects needed for relationNet.')
 parser.add_argument('--reduction_ratio', type=int, default=2,
                     help='reduction_ratio')
