@@ -401,8 +401,8 @@ class RelationNetwork(nn.Module):
         #print('relations       :', relations.size())
         x_r = relations.view(-1,x_i.size(3)+x_j.size(3)+q.size(3))
         #print('x_r:',x_r.size())
-        res1 = x_r.clone()
-        x_r = F.relu((self.g_fc1(x_r))) + res1
+        #res1 = x_r.clone()
+        x_r = F.relu((self.g_fc1(x_r)))# + res1
         x_r = self.ln1.forward(x_r)
         #res2 = x_r.clone()
         #x_r = F.relu((self.g_fc2(x_r))) + res2
