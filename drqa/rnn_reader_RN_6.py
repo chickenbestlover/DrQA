@@ -39,7 +39,7 @@ class RnnDocReader(nn.Module):
                 self.embedding_order = nn.Embedding(num_embeddings=1000,embedding_dim=embedding.size(1),
                                                     padding_idx=padding_idx)
                 self.embedding_order.weight.data = layers.position_encoding_init(n_position=1000,d_pos_vec=embedding.size(1))
-
+                self.embedding_order.weight.requires_grad= False
             if opt['fix_embeddings']:
                 assert opt['tune_partial'] == 0
                 for p in self.embedding.parameters():
@@ -107,10 +107,10 @@ class RnnDocReader(nn.Module):
         reduction_ratio = opt['reduction_ratio']
         self.doc_layerNorm1 = layers.LayerNorm(d_hid=doc_hidden_size)
         #self.doc_1by1conv = layers.Conv1by1DimReduce(in_channels=doc_hidden_size,out_channels=doc_hidden_size//reduction_ratio)
-        self.doc_layerNorm2 = layers.LayerNorm(d_hid=doc_hidden_size)
-        self.doc_conv_encoder = layers.convEncoder(in_channels=doc_hidden_size,out_channels=doc_hidden_size)
+        #self.doc_layerNorm2 = layers.LayerNorm(d_hid=doc_hidden_size)
+        #self.doc_conv_encoder = layers.convEncoder(in_channels=doc_hidden_size,out_channels=doc_hidden_size)
         #self.doc_self_attn = layers.doc_LinearSeqAttn(input_size=doc_hidden_size//reduction_ratio,output_size=num_ojbects)
-        #self.doc_self_attn = layers.doc_LinearSeqAttn(input_size=doc_hidden_size, output_size=num_ojbects)
+        self.doc_self_attn = layers.doc_LinearSeqAttn(input_size=doc_hidden_size, output_size=num_ojbects)
         #self.doc_layerNorm3 = layers.LayerNorm(d_hid=doc_hidden_size // reduction_ratio)
         #self.question_1by1conv = layers.Conv1by1DimReduce(in_channels=question_hidden_size, out_channels=question_hidden_size// reduction_ratio)
         self.question_layerNorm1 = layers.LayerNorm(d_hid=question_hidden_size)
@@ -156,9 +156,9 @@ class RnnDocReader(nn.Module):
         """
         # Embed both document and question
         x1_emb = self.embedding(x1)
-        x1_emb += self.embedding_order(x1_order)
+        #x1_emb += self.embedding_order(x1_order)
         x2_emb = self.embedding(x2)
-        x2_emb += self.embedding_order(x2_order)
+        #x2_emb += self.embedding_order(x2_order)
 
         if self.opt['dropout_emb'] > 0:
             x1_emb = nn.functional.dropout(x1_emb, p=self.opt['dropout_emb'],
@@ -191,18 +191,18 @@ class RnnDocReader(nn.Module):
         #if self.eval(): print('doc_hiddens:',doc_hiddens.size())
 
         #if self.eval(): print('doc_hiddens:', doc_hiddens.size())
-        doc_hiddens_compact = self.doc_conv_encoder(doc_hiddens)
+        #doc_hiddens_compact = self.doc_conv_encoder(doc_hiddens)
         #if self.eval(): print('doc_hiddens_compact:', doc_hiddens_compact.size())
 
         # doc_merge_weights = self.doc_self_attn(doc_hiddens_compact,x1_mask)
-        #doc_merge_weights = self.doc_self_attn(doc_hiddens,x1_mask)
+        doc_merge_weights = self.doc_self_attn(doc_hiddens,x1_mask)
         #doc_hiddens = self.doc_1by1conv(doc_hiddens)
 
         #if self.eval(): print('doc_merge_weights:', doc_merge_weights.size())
 
         #doc_hiddens_compact = torch.bmm(doc_merge_weights.transpose(1, 2), doc_hiddens_compact)
-        #doc_hiddens_compact = torch.bmm(doc_merge_weights.transpose(1, 2), doc_hiddens)
-        doc_hiddens_compact = self.doc_layerNorm2(doc_hiddens_compact.contiguous().view(-1,doc_hiddens_compact.size(2))).view_as(doc_hiddens_compact)
+        doc_hiddens_compact = torch.bmm(doc_merge_weights.transpose(1, 2), doc_hiddens)
+        #doc_hiddens_compact = self.doc_layerNorm2(doc_hiddens_compact.contiguous().view(-1,doc_hiddens_compact.size(2))).view_as(doc_hiddens_compact)
         #doc_hiddens = self.doc_1by1conv(doc_hiddens)
         #if self.eval(): print('doc_hiddens_compact:', doc_hiddens_compact.size())
 

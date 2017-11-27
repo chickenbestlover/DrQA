@@ -13,7 +13,7 @@ import msgpack
 import pandas as pd
 from drqa.model import DocReaderModel
 from drqa.utils import str2bool
-
+import numpy as np
 parser = argparse.ArgumentParser(
     description='Train a Document Reader model.'
 )
@@ -272,9 +272,9 @@ class BatchGen:
 
             context_len = max(len(x) for x in batch[0])
             context_id = torch.LongTensor(batch_size, context_len).fill_(0)
+
             for i, doc in enumerate(batch[0]):
                 context_id[i, :len(doc)] = torch.LongTensor(doc)
-
             feature_len = len(batch[1][0][0])
             context_feature = torch.Tensor(batch_size, context_len, feature_len).fill_(0)
             for i, doc in enumerate(batch[1]):
