@@ -11,7 +11,7 @@ import logging
 
 from torch.autograd import Variable
 from .utils import AverageMeter
-from .rnn_reader_RN_7 import RnnDocReader
+from .rnn_reader_RN_8 import RnnDocReader
 
 # Modification:
 #   - change the logger name

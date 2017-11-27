@@ -221,6 +221,40 @@ class BilinearSeqAttn(nn.Module):
             alpha = F.softmax(xWy)
         return alpha
 
+class BilinearSeqAttn_norm(nn.Module):
+    """A bilinear attention layer over a sequence X w.r.t y:
+    * o_i = softmax(x_i'Wy) for x_i in X.
+
+    Optionally don't normalize output weights.
+    """
+    def __init__(self, x_size, y_size, identity=False,activation='softmax'):
+        super(BilinearSeqAttn_norm, self).__init__()
+        self.activation=activation
+        if not identity:
+            self.linear = nn.Linear(y_size, x_size)
+        else:
+            self.linear = None
+
+    def forward(self, x, y, x_mask):
+        """
+        x = batch * len * h1
+        y = batch * h2
+        x_mask = batch * len
+        """
+        Wy = self.linear(y) if self.linear is not None else y
+        #if self.eval(): print('Wy:', Wy.size())
+        xWy = x.bmm(Wy.unsqueeze(2)).squeeze(2)
+        xWy.data.masked_fill_(x_mask.data, -float('inf'))
+        if self.training:
+            if self.activation=='logsoftmax':
+                # In training we output log-softmax for NLL
+                alpha = F.log_softmax(xWy)
+            else:
+                alpha = F.softmax(xWy)
+        else:
+            # ...Otherwise 0-1 probabilities
+            alpha = F.softmax(xWy)
+        return alpha
 
 class LinearSeqAttn(nn.Module):
     """Self attention over a sequence:
@@ -441,3 +475,19 @@ def weighted_avg(x, weights):
     weights = batch * len
     """
     return weights.unsqueeze(1).bmm(x).squeeze(1)
+
+def kmax_indice(x, dim, k):
+    return x.topk(k, dim = dim)[1].sort(dim = dim)[0]
+
+def indice_pooling(x, indices):
+    #out = x.contiguous().transpose(1,2)
+    #out = out.contiguous().view(-1,x.size(1))
+    #indices = indices.unsqueeze(2).repeat(1,1,x.size(2))
+    #print('indices:',indices.size())
+    #print('x:',x.size())
+    out=torch.cat([torch.index_select(x_, 0, i).unsqueeze(0) for x_, i in zip(x, indices)])
+    #print('out:',out)
+    #out = x.gather(dim=2, index=indices)
+    #out = out.view(x.size(0),x.size(2),-1)
+    #out = out.transpose(1,2)
+    return out
