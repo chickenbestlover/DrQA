@@ -28,6 +28,7 @@ class StackedBRNN(nn.Module):
         self.num_layers = num_layers
         self.concat_layers = concat_layers
         self.rnns = nn.ModuleList()
+        self.lns = nn.ModuleList()
         for i in range(num_layers):
             input_size = input_size if i == 0 else 2 * hidden_size
             #self.rnns.append(rnn_type(input_size, hidden_size,
@@ -38,6 +39,7 @@ class StackedBRNN(nn.Module):
                                       rnn_dropout=dropout_rate,
                                       use_tanh=1,
                                       bidirectional=True))
+            self.lns.append(LayerNorm(d_hid=2 * hidden_size))
 
     def forward(self, x, x_mask):
         """Can choose to either handle or ignore variable length sequences.
@@ -69,6 +71,10 @@ class StackedBRNN(nn.Module):
 #                                      training=self.training)
             # Forward
             rnn_output = self.rnns[i](rnn_input)[0]
+            if i > 0:
+                rnn_output += rnn_input
+                rnn_output = self.lns[i](rnn_output.view(-1,rnn_output.size(2))).view_as(rnn_output)
+
             outputs.append(rnn_output)
 
         # Concat hidden layers

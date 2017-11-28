@@ -61,8 +61,8 @@ parser.add_argument('--rnn_padding', action='store_true',
                     help='perform rnn padding (much slower but more accurate).')
 # model
 parser.add_argument('--question_merge', default='self_attn')
-parser.add_argument('--doc_layers', type=int, default=3)
-parser.add_argument('--question_layers', type=int, default=3)
+parser.add_argument('--doc_layers', type=int, default=8)
+parser.add_argument('--question_layers', type=int, default=8)
 parser.add_argument('--hidden_size', type=int, default=128)
 parser.add_argument('--num_features', type=int, default=4)
 parser.add_argument('--pos', type=str2bool, nargs='?', const=True, default=True,
@@ -87,7 +87,7 @@ parser.add_argument('--dropout_rnn_output', type=str2bool, nargs='?',
 parser.add_argument('--max_len', type=int, default=15)
 parser.add_argument('--rnn_type', default='lstm',
                     help='supported types: rnn, gru, lstm')
-parser.add_argument('--num_objects', type=int, default=6,
+parser.add_argument('--num_objects', type=int, default=4,
                     help='The number of objects needed for relationNet.')
 parser.add_argument('--reduction_ratio', type=int, default=2,
                     help='reduction_ratio')
@@ -155,6 +155,8 @@ def main():
         best_val_score = f1
     else:
         best_val_score = 0.0
+
+    print(opt)
 
     for epoch in range(epoch_0, epoch_0 + args.epochs):
         log.warning('Epoch {}'.format(epoch))
