@@ -34,11 +34,18 @@ class StackedBRNN(nn.Module):
             #self.rnns.append(rnn_type(input_size, hidden_size,
             #                          num_layers=1,
             #                          bidirectional=True))
-            self.rnns.append(MF.SRUCell(input_size, hidden_size,
-                                      dropout=dropout_rate,
-                                      rnn_dropout=dropout_rate,
-                                      use_tanh=1,
-                                      bidirectional=True))
+            if i==0:
+                self.rnns.append(MF.SRUCell(input_size, hidden_size,
+                                          dropout=dropout_rate,
+                                          rnn_dropout=dropout_rate,
+                                          use_tanh=1,
+                                          bidirectional=True))
+            else:
+                self.rnns.append(MF.SRUCell(input_size, 2 * hidden_size,
+                                          dropout=dropout_rate,
+                                          rnn_dropout=dropout_rate,
+                                          use_tanh=1,
+                                          bidirectional=False))
             self.lns.append(LayerNorm(d_hid=2 * hidden_size))
 
     def forward(self, x, x_mask):
