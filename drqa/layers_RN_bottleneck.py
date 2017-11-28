@@ -29,18 +29,29 @@ class StackedBRNN(nn.Module):
         self.concat_layers = concat_layers
         self.rnns = nn.ModuleList()
         self.lns = nn.ModuleList()
+        self.in_bottles = nn.ModuleList()
+        self.out_bottles = nn.ModuleList()
+
         for i in range(num_layers):
             input_size = input_size if i == 0 else 2 * hidden_size
             #self.rnns.append(rnn_type(input_size, hidden_size,
             #                          num_layers=1,
             #                          bidirectional=True))
-            self.rnns.append(MF.SRUCell(input_size, hidden_size,
-                                      dropout=dropout_rate,
-                                      rnn_dropout=dropout_rate,
-                                      use_tanh=1,
-                                      bidirectional=True))
-
+            if i==0:
+                self.rnns.append(MF.SRUCell(input_size, hidden_size,
+                                          dropout=dropout_rate,
+                                          rnn_dropout=dropout_rate,
+                                          use_tanh=1,
+                                          bidirectional=True))
+            else:
+                self.rnns.append(MF.SRUCell(input_size//4, hidden_size//4,
+                                          dropout=dropout_rate,
+                                          rnn_dropout=dropout_rate,
+                                          use_tanh=1,
+                                          bidirectional=True))
+            self.in_bottles.append(Conv1by1DimReduce(in_channels=input_size,out_channels=input_size//4))
             self.lns.append(LayerNorm(d_hid=2 * hidden_size))
+            self.out_bottles.append(Conv1by1DimReduce(in_channels=input_size//4, out_channels=input_size))
 
     def forward(self, x, x_mask):
         """Can choose to either handle or ignore variable length sequences.
@@ -64,17 +75,22 @@ class StackedBRNN(nn.Module):
         outputs = [x]
         for i in range(self.num_layers):
             rnn_input = outputs[-1]
-
+            res = rnn_input.clone()
             # Apply dropout to hidden input
 #            if self.dropout_rate > 0:
 #                rnn_input = F.dropout(rnn_input,
 #                                      p=self.dropout_rate,
 #                                      training=self.training)
             # Forward
-            rnn_output = self.rnns[i](rnn_input)[0]
             if i > 0:
-                rnn_output += rnn_input
-                rnn_output = self.lns[i](rnn_output.view(-1,rnn_output.size(2))).view_as(rnn_output)
+                rnn_input = self.in_bottles[i](rnn_input)
+
+            rnn_output = self.rnns[i](rnn_input)[0]
+
+            if i > 0:
+                rnn_output = self.out_bottles[i](rnn_output)
+                rnn_output += res
+                rnn_output = self.lns[i](rnn_output.contiguous().view(-1,rnn_output.size(2))).view_as(rnn_output)
 
             outputs.append(rnn_output)
 
