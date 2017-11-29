@@ -59,7 +59,7 @@ class StackedBRNN(nn.Module):
         """Faster encoding that ignores any padding."""
         # Transpose batch and sequence dims
         x = x.transpose(0, 1)
-
+        #print(x.size())
         # Encode all layers
         outputs = [x]
         for i in range(self.num_layers):
@@ -234,7 +234,7 @@ class BilinearSeqAttn_norm(nn.Module):
 
     Optionally don't normalize output weights.
     """
-    def __init__(self, x_size, y_size, identity=False,activation='softmax'):
+    def __init__(self, x_size, y_size, identity=False,activation='sigmoid'):
         super(BilinearSeqAttn_norm, self).__init__()
         self.activation=activation
         if not identity:
@@ -252,15 +252,9 @@ class BilinearSeqAttn_norm(nn.Module):
         #if self.eval(): print('Wy:', Wy.size())
         xWy = x.bmm(Wy.unsqueeze(2)).squeeze(2)
         xWy.data.masked_fill_(x_mask.data, -float('inf'))
-        if self.training:
-            if self.activation=='logsoftmax':
-                # In training we output log-softmax for NLL
-                alpha = F.log_softmax(xWy)
-            else:
-                alpha = F.softmax(xWy)
-        else:
-            # ...Otherwise 0-1 probabilities
-            alpha = F.softmax(xWy)
+
+        #alpha = F.softmax(xWy)
+        alpha = F.sigmoid(xWy)
         return alpha
 
 class LinearSeqAttn(nn.Module):
@@ -461,6 +455,7 @@ def position_encoding_init(n_position, d_pos_vec):
     position_enc[1:, 0::2] = np.sin(position_enc[1:, 0::2])  # dim 2i
     position_enc[1:, 1::2] = np.cos(position_enc[1:, 1::2])  # dim 2i+1
     return torch.from_numpy(position_enc).type(torch.FloatTensor)
+
 
 
 # ------------------------------------------------------------------------------
