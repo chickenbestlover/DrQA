@@ -111,11 +111,11 @@ class RnnDocReader(nn.Module):
         # Bilinear attention for span start/end
         self.start_attn = layers.BilinearSeqAttn(
             doc_hidden_size,
-            question_hidden_size,
+            2*question_hidden_size,
         )
         self.end_attn = layers.BilinearSeqAttn(
             doc_hidden_size,
-            question_hidden_size,
+            2*question_hidden_size,
         )
 
     def forward(self, x1, x1_f, x1_pos, x1_ner, x1_mask, x2, x2_mask,x1_order,x2_order):
@@ -184,6 +184,7 @@ class RnnDocReader(nn.Module):
         '''
         doc_question_hidden = self.relationNet(doc_hiddens_compact,question_hiddens)
         doc_question_hidden = nn.functional.dropout(doc_question_hidden,p=0.2,training=self.training)
+        doc_question_hidden = torch.cat([doc_question_hidden, question_hidden], 1)
         start_scores = self.start_attn(doc_hiddens, doc_question_hidden, x1_mask)
         end_scores = self.end_attn(doc_hiddens, doc_question_hidden, x1_mask)
         return start_scores, end_scores
