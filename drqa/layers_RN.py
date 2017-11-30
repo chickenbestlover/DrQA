@@ -59,7 +59,7 @@ class StackedBRNN(nn.Module):
         """Faster encoding that ignores any padding."""
         # Transpose batch and sequence dims
         x = x.transpose(0, 1)
-
+        #print(x.size())
         # Encode all layers
         outputs = [x]
         for i in range(self.num_layers):
@@ -72,9 +72,9 @@ class StackedBRNN(nn.Module):
 #                                      training=self.training)
             # Forward
             rnn_output = self.rnns[i](rnn_input)[0]
-            if i > 0:
-                rnn_output += rnn_input
-                rnn_output = self.lns[i](rnn_output.view(-1,rnn_output.size(2))).view_as(rnn_output)
+            #if i > 0:
+             #   rnn_output += rnn_input
+             #   rnn_output = self.lns[i](rnn_output.view(-1,rnn_output.size(2))).view_as(rnn_output)
 
             outputs.append(rnn_output)
 
@@ -234,7 +234,7 @@ class BilinearSeqAttn_norm(nn.Module):
 
     Optionally don't normalize output weights.
     """
-    def __init__(self, x_size, y_size, identity=False,activation='softmax'):
+    def __init__(self, x_size, y_size, identity=False,activation='sigmoid'):
         super(BilinearSeqAttn_norm, self).__init__()
         self.activation=activation
         if not identity:
@@ -252,15 +252,9 @@ class BilinearSeqAttn_norm(nn.Module):
         #if self.eval(): print('Wy:', Wy.size())
         xWy = x.bmm(Wy.unsqueeze(2)).squeeze(2)
         xWy.data.masked_fill_(x_mask.data, -float('inf'))
-        if self.training:
-            if self.activation=='logsoftmax':
-                # In training we output log-softmax for NLL
-                alpha = F.log_softmax(xWy)
-            else:
-                alpha = F.softmax(xWy)
-        else:
-            # ...Otherwise 0-1 probabilities
-            alpha = F.softmax(xWy)
+
+        #alpha = F.softmax(xWy)
+        alpha = F.sigmoid(xWy)
         return alpha
 
 class LinearSeqAttn(nn.Module):
@@ -390,23 +384,23 @@ class RelationNetwork(nn.Module):
         #self.g_bn4 = torch.nn.BatchNorm1d(num_features=output_size)
         self.ln4 = LayerNorm(d_hid=output_size)
 
-    def forward(self,doc_hiddens, question_hidden):
+    def forward(self, doc_hiddens, question_hiddens):
         '''
 
         :param doc_hiddens: batch * input_len * in_channels
-        :param question_hidden: batch * input_len * in_channels
+        :param question_hiddens: batch * input_len * in_channels
         :return: batch * output_size
         '''
         # Concatenate all available relations
-        num_objects = doc_hiddens.size(1)
-        x_i = doc_hiddens.unsqueeze(1)
-        x_i = x_i.repeat(1, num_objects, 1, 1)
-        x_j = doc_hiddens.unsqueeze(2)
-        x_j = x_j.repeat(1, 1, num_objects, 1)
-        q = question_hidden.unsqueeze(1).unsqueeze(1).repeat(1, num_objects, num_objects, 1)
-        relations = torch.cat([x_i, x_j, q], 3)
+        num_doc_objects = doc_hiddens.size(1)
+        num_question_objects = question_hiddens.size(1)
+        num_total_objects = num_doc_objects * num_question_objects
+        doc = doc_hiddens.unsqueeze(1)
+        doc = doc.repeat(1, num_question_objects, 1, 1)
+        q = question_hiddens.unsqueeze(2).repeat(1, 1, num_doc_objects, 1)
+        relations = torch.cat([doc, q], 3)
         #print('relations       :', relations.size())
-        x_r = relations.view(-1,x_i.size(3)+x_j.size(3)+q.size(3))
+        x_r = relations.view(-1,doc.size(3)+q.size(3))
         #print('x_r:',x_r.size())
         #res1 = x_r.clone()
         #print(self.g_fc1)
@@ -422,7 +416,7 @@ class RelationNetwork(nn.Module):
         x_r = self.ln4.forward(x_r)
 
         x_g = x_r.view(relations.size(0), relations.size(1) * relations.size(2), -1)
-        x_g = x_g.sum(1).squeeze(1)
+        x_g = x_g.sum(1).squeeze(1)/num_total_objects
 
         return x_g
 
@@ -461,6 +455,7 @@ def position_encoding_init(n_position, d_pos_vec):
     position_enc[1:, 0::2] = np.sin(position_enc[1:, 0::2])  # dim 2i
     position_enc[1:, 1::2] = np.cos(position_enc[1:, 1::2])  # dim 2i+1
     return torch.from_numpy(position_enc).type(torch.FloatTensor)
+
 
 
 # ------------------------------------------------------------------------------

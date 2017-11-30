@@ -22,7 +22,7 @@ class RnnDocReader(nn.Module):
     """Network for the Document Reader module of DrQA."""
     RNN_TYPES = {'lstm': nn.LSTM, 'gru': nn.GRU, 'rnn': nn.RNN}
 
-    def __init__(self, opt, padding_idx=0, embedding=None, normalize_emb=False, reduction_ratio = 5):
+    def __init__(self, opt, padding_idx=0, embedding=None, normalize_emb=False,embedding_order=True):
         super(RnnDocReader, self).__init__()
         # Store config
         self.opt = opt
@@ -91,7 +91,7 @@ class RnnDocReader(nn.Module):
             rnn_type=self.RNN_TYPES[opt['rnn_type']],
             padding=opt['rnn_padding'],
         )
-
+        self.num_object=opt['num_objects']
         # Output sizes of rnn encoders
         doc_hidden_size = 2 * opt['hidden_size']
         question_hidden_size = 2 * opt['hidden_size']
@@ -99,34 +99,26 @@ class RnnDocReader(nn.Module):
             doc_hidden_size *= opt['doc_layers']
             question_hidden_size *= opt['question_layers']
 
-        num_ojbects = opt['num_objects']
-        reduction_ratio = opt['reduction_ratio']
-        self.doc_1by1conv = layers.Conv1by1DimReduce(in_channels=doc_hidden_size,out_channels=doc_hidden_size//reduction_ratio)
-        self.doc_conv_encoder = layers.convEncoder(in_channels=doc_hidden_size//reduction_ratio,out_channels=doc_hidden_size//reduction_ratio)
-        self.doc_self_attn = layers.doc_LinearSeqAttn(input_size=doc_hidden_size//reduction_ratio,output_size=num_ojbects)
-
-        self.question_1by1conv = layers.Conv1by1DimReduce(in_channels=question_hidden_size, out_channels=question_hidden_size// reduction_ratio)
-
-
         # Question merging
         if opt['question_merge'] not in ['avg', 'self_attn']:
             raise NotImplementedError('question_merge = %s' % opt['question_merge'])
         if opt['question_merge'] == 'self_attn':
-            self.self_attn = layers.LinearSeqAttn(question_hidden_size//reduction_ratio)
-
-        self.relationNet = layers.RelationNetwork(num_objects=num_ojbects, hidden_size=3 * doc_hidden_size//reduction_ratio,output_size=3 * doc_hidden_size//reduction_ratio)
+            self.self_attn = layers.LinearSeqAttn(question_hidden_size)
+        self.relationNet = layers.RelationNetwork(hidden_size=2 * doc_hidden_size, output_size=doc_hidden_size)
+        # doc_attention for maxpooling
+        self.doc_attn = layers.BilinearSeqAttn_norm(doc_hidden_size,question_hidden_size)
 
         # Bilinear attention for span start/end
         self.start_attn = layers.BilinearSeqAttn(
-            doc_hidden_size//reduction_ratio,
-            3 * question_hidden_size//reduction_ratio,
+            doc_hidden_size,
+            2*question_hidden_size,
         )
         self.end_attn = layers.BilinearSeqAttn(
-            doc_hidden_size//reduction_ratio,
-            3 * question_hidden_size//reduction_ratio,
+            doc_hidden_size,
+            2*question_hidden_size,
         )
 
-    def forward(self, x1, x1_f, x1_pos, x1_ner, x1_mask, x2, x2_mask):
+    def forward(self, x1, x1_f, x1_pos, x1_ner, x1_mask, x2, x2_mask,x1_order,x2_order):
         """Inputs:
         x1 = document word indices             [batch * len_d]
         x1_f = document word features indices  [batch * len_d * nfeat]
@@ -138,7 +130,9 @@ class RnnDocReader(nn.Module):
         """
         # Embed both document and question
         x1_emb = self.embedding(x1)
+        #x1_emb_order = self.embedding_order(x1_order)
         x2_emb = self.embedding(x2)
+        #x2_emb += self.embedding_order(x2_order)
 
         if self.opt['dropout_emb'] > 0:
             x1_emb = nn.functional.dropout(x1_emb, p=self.opt['dropout_emb'],
@@ -167,38 +161,30 @@ class RnnDocReader(nn.Module):
 
         # Encode document with RNN
         doc_hiddens = self.doc_rnn(drnn_input, x1_mask)
-        #if self.eval(): print('doc_hiddens:',doc_hiddens.size())
-        doc_hiddens = self.doc_1by1conv(doc_hiddens)
-        #if self.eval(): print('doc_hiddens:', doc_hiddens.size())
-        doc_hiddens_compact = self.doc_conv_encoder(doc_hiddens)
-        #if self.eval(): print('doc_hiddens_compact:', doc_hiddens_compact.size())
-
-        doc_merge_weights = self.doc_self_attn(doc_hiddens_compact,x1_mask)
-        #if self.eval(): print('doc_merge_weights:', doc_merge_weights.size())
-
-        doc_hiddens_compact = torch.bmm(doc_merge_weights.transpose(1, 2), doc_hiddens_compact)
-        #if self.eval(): print('doc_hiddens_compact:', doc_hiddens_compact.size())
-
         # Encode question with RNN + merge hiddens
         question_hiddens = self.question_rnn(x2_emb, x2_mask)
-        question_hiddens = self.question_1by1conv(question_hiddens)
-        #if self.eval(): print('question_hiddens:', question_hiddens.size())
-
         if self.opt['question_merge'] == 'avg':
             q_merge_weights = layers.uniform_weights(question_hiddens, x2_mask)
         elif self.opt['question_merge'] == 'self_attn':
             q_merge_weights = self.self_attn(question_hiddens, x2_mask)
         question_hidden = layers.weighted_avg(question_hiddens, q_merge_weights)
-        #if self.eval(): print('question_hidden:', question_hidden.size())
+
+
+        doc_attn_scores = self.doc_attn(doc_hiddens,question_hidden,x1_mask)
+        #print('doc_attn_scores:',doc_attn_scores)
+        idx = layers.kmax_indice(x = doc_attn_scores,dim=1,k=self.num_object)
+        #print('idx:',idx.size())
+        #print('doc_hiddens:',doc_hiddens.size())
+        #doc_hiddens = torch.cat([doc_hiddens, x1_emb_order], dim=2)
+        doc_hiddens_compact = layers.indice_pooling(doc_hiddens, indices=idx)
+
 
         '''
         Relation Network
         '''
-        doc_question_hidden = self.relationNet(doc_hiddens_compact,question_hidden)
-        #if self.eval(): print('doc_question_hidden:', doc_question_hidden.size())
-
-
-        # Predict start and end positions
+        doc_question_hidden = self.relationNet(doc_hiddens_compact,question_hiddens)
+        doc_question_hidden = nn.functional.dropout(doc_question_hidden,p=0.2,training=self.training)
+        doc_question_hidden = torch.cat([doc_question_hidden, question_hidden], 1)
         start_scores = self.start_attn(doc_hiddens, doc_question_hidden, x1_mask)
         end_scores = self.end_attn(doc_hiddens, doc_question_hidden, x1_mask)
         return start_scores, end_scores
