@@ -208,7 +208,7 @@ class RnnDocReader(nn.Module):
         '''
         m-dim multi-attention1 + dot-product
         '''
-        doc_hiddens_compact = self.doc_attn.forward(question_hiddens,doc_hiddens,doc_hiddens, x1_mask)  # Batch x questionLen x doc_hidden_size
+        doc_hiddens_compact, _ = self.doc_attn.forward(question_hiddens,doc_hiddens,doc_hiddens, x1_mask)  # Batch x questionLen x doc_hidden_size
 
 
         '''
