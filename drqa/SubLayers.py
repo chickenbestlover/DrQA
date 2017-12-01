@@ -57,7 +57,7 @@ class MultiHeadAttention(nn.Module):
 
         # perform attention, result size = (n_head * mb_size) x len_q x d_v
         attn_mask = attn_mask.unsqueeze(1).repeat(1,len_q,1).byte()
-        print(attn_mask)
+        #print(attn_mask)
         outputs, attns = self.attention(q_s, k_s, v_s, attn_mask=attn_mask.repeat(n_head, 1, 1))
 
         # back to original mb_size batch, result size = mb_size x len_q x (n_head*d_v)
