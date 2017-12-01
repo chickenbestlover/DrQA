@@ -298,7 +298,34 @@ class doc_LinearSeqAttn(nn.Module):
 
         scores.data.masked_fill_(x_mask.data, -float('inf'))
         alpha = F.softmax(scores)
-        return alpha
+        return alpha.transpose(1,2)
+
+class doc_LinearSeqAttn2(nn.Module):
+    """Self attention over a sequence:
+    * o_i = softmax(Wx_i) for x_i in X.
+    """
+
+    def __init__(self, input_size, hidden_size, output_size):
+        super(doc_LinearSeqAttn2, self).__init__()
+        self.input_size = input_size
+        self.output_size = output_size
+        self.hidden_size = hidden_size
+        self.linear1 = nn.Linear(input_size, hidden_size)
+        self.linear2 = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x, x_mask):
+        """
+        x = batch * len * input_size
+        x_mask = batch * len
+        """
+        x_flat = x.contiguous().view(-1, x.size(-1)) # x_flat = (batch x len) * input_size
+        hidden = torch.nn.functional.tanh(self.linear1(x_flat)) # hidden = (batch x len) * hidden_size
+        scores = self.linear2(hidden).view(x.size(0), x.size(1), self.output_size) # scores = batch * len * output_size
+        x_mask = x_mask.unsqueeze(2).expand_as(scores)
+
+        scores.data.masked_fill_(x_mask.data, -float('inf'))
+        alpha = F.softmax(scores)
+        return alpha.transpose(1,2)
 
 class LinearSeqAttn_ques(nn.Module):
     """Self attention over a sequence:

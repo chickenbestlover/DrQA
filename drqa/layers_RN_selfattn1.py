@@ -298,7 +298,7 @@ class doc_LinearSeqAttn(nn.Module):
 
         scores.data.masked_fill_(x_mask.data, -float('inf'))
         alpha = F.softmax(scores)
-        return alpha
+        return alpha.transpose(1,2)
 
 class LinearSeqAttn_ques(nn.Module):
     """Self attention over a sequence:

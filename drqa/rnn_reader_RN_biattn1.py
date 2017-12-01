@@ -5,7 +5,7 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 import torch
 import torch.nn as nn
-from . import layers_RN as layers
+from . import layers_RN_biattn1 as layers
 
 # Modification: add 'pos' and 'ner' features.
 # Origin: https://github.com/facebookresearch/ParlAI/tree/master/parlai/agents/drqa
@@ -106,7 +106,7 @@ class RnnDocReader(nn.Module):
             self.self_attn = layers.LinearSeqAttn(question_hidden_size)
         self.relationNet = layers.RelationNetwork(hidden_size=2 * doc_hidden_size, output_size=doc_hidden_size)
         # doc_attention for maxpooling
-        self.doc_attn = layers.BilinearSeqAttn_norm(doc_hidden_size,question_hidden_size)
+        self.doc_attn = layers.SeqAttnMatch(input_size=doc_hidden_size)
 
         # Bilinear attention for span start/end
         self.start_attn = layers.BilinearSeqAttn(
@@ -170,12 +170,34 @@ class RnnDocReader(nn.Module):
         question_hidden = layers.weighted_avg(question_hiddens, q_merge_weights)
 
 
-        doc_attn_scores = self.doc_attn.forward(doc_hiddens,question_hidden,x1_mask)
-        #print('doc_attn_scores:',doc_attn_scores)
-        idx = layers.kmax_indice(x = doc_attn_scores,dim=1,k=self.num_object)
+        '''
+        1-dim attention + kmax (k=num_object)
+        '''
+        #doc_attn_score = self.doc_attn.forward(doc_hiddens,question_hidden,x1_mask)  # Batch x seqLen
+        #print('doc_attn_score:',doc_attn_score)
+        #idx = layers.kmax_indice(x = doc_attn_score,dim=1,k=self.num_object)
         #print('idx:',idx.size())
         #print('doc_hiddens:',doc_hiddens.size())
-        doc_hiddens_compact = layers.indice_pooling(doc_hiddens, indices=idx)
+        #doc_hiddens_compact = layers.indice_pooling(doc_hiddens, indices=idx)
+
+        '''
+        m-dim attention1 + dot-product
+        '''
+        #doc_attn_scores = self.doc_attn.forward(doc_hiddens,x1_mask)  # Batch x seqLen x num_object
+        #print('doc_attn_score:',doc_attn_scores)
+        #doc_hiddens_compact = doc_attn_scores.bmm(doc_hiddens)
+
+        '''
+        m-dim attention1 + dot-product
+        '''
+        #doc_attn_scores = self.doc_attn.forward(doc_hiddens, x1_mask)  # Batch x seqLen x num_object
+        # print('doc_attn_score:',doc_attn_scores)
+        #doc_hiddens_compact = doc_attn_scores.bmm(doc_hiddens)
+
+        '''
+        m-dim bi-attention1 + dot-product
+        '''
+        doc_hiddens_compact = self.doc_attn.forward(question_hiddens,doc_hiddens, x1_mask)  # Batch x questionLen x doc_hidden_size
 
 
         '''

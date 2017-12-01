@@ -228,19 +228,16 @@ class BilinearSeqAttn(nn.Module):
             alpha = F.softmax(xWy)
         return alpha
 
-class BilinearSeqAttn_norm(nn.Module):
+class biAttn1(nn.Module):
     """A bilinear attention layer over a sequence X w.r.t y:
     * o_i = softmax(x_i'Wy) for x_i in X.
 
     Optionally don't normalize output weights.
     """
-    def __init__(self, x_size, y_size, identity=False,activation='sigmoid'):
-        super(BilinearSeqAttn_norm, self).__init__()
+    def __init__(self, x_size, y_size,activation='sigmoid'):
+        super(biAttn1, self).__init__()
         self.activation=activation
-        if not identity:
-            self.linear = nn.Linear(y_size, x_size)
-        else:
-            self.linear = None
+        self.linear = nn.Linear(y_size, x_size)
 
     def forward(self, x, y, x_mask):
         """
@@ -248,7 +245,7 @@ class BilinearSeqAttn_norm(nn.Module):
         y = batch * h2
         x_mask = batch * len
         """
-        Wy = self.linear(y) if self.linear is not None else y
+        Wy = self.linear(y)
         #if self.eval(): print('Wy:', Wy.size())
         xWy = x.bmm(Wy.unsqueeze(2)).squeeze(2)
         xWy.data.masked_fill_(x_mask.data, -float('inf'))
