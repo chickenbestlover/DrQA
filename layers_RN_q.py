@@ -30,11 +30,11 @@ class StackedBRNN(nn.Module):
         self.rnns = nn.ModuleList()
         self.lns = nn.ModuleList()
         for i in range(num_layers):
-            input_size = input_size if i == 0 else 2 * hidden_size
+            self.input_size = input_size if i == 0 else 2 * hidden_size+hidden_size//2
             #self.rnns.append(rnn_type(input_size, hidden_size,
             #                          num_layers=1,
             #                          bidirectional=True))
-            self.rnns.append(MF.SRUCell(input_size, hidden_size,
+            self.rnns.append(MF.SRUCell(self.input_size, hidden_size,
                                       dropout=dropout_rate,
                                       rnn_dropout=dropout_rate,
                                       use_tanh=1,
@@ -71,6 +71,8 @@ class StackedBRNN(nn.Module):
 #                                      p=self.dropout_rate,
 #                                      training=self.training)
             # Forward
+            #print(self.input_size)
+            #print(rnn_input.size())
             rnn_output = self.rnns[i](rnn_input)[0]
             #if i > 0:
              #   rnn_output += rnn_input
@@ -360,23 +362,21 @@ class convEncoder(nn.Module):
         out= torch.transpose(F.relu(self.maxPool(self.conv3(out))), 1, 2)
         return out
 
-class RelationNetwork1(nn.Module):
+class RelationNetwork(nn.Module):
     '''
     RelationNet
     '''
     def __init__(self,hidden_size, output_size):
-        super(RelationNetwork1, self).__init__()
+        super(RelationNetwork, self).__init__()
 
         self.hidden_size = hidden_size
         self.output_size = output_size
-
         self.g_fc1 = torch.nn.Linear(hidden_size, output_size)
         #self.g_bn1 = torch.nn.BatchNorm1d(num_features=hidden_size)
         self.ln1 = LayerNorm(d_hid=output_size)
-
-        #self.g_fc2 = torch.nn.Linear(output_size, output_size)
+        #self.g_fc2 = torch.nn.Linear(hidden_size, hidden_size)
         #self.g_bn2 = torch.nn.BatchNorm1d(num_features=hidden_size)
-        #self.ln2 = LayerNorm(d_hid=output_size)
+        #self.ln2 = LayerNorm(d_hid=hidden_size)
 
         #self.g_fc3 = torch.nn.Linear(hidden_size, hidden_size)
         #self.g_bn3 = torch.nn.BatchNorm1d(num_features=hidden_size)
@@ -409,67 +409,6 @@ class RelationNetwork1(nn.Module):
         x_r = F.relu((self.g_fc1(x_r)))# + res1
         x_r = self.ln1.forward(x_r)
         #res2 = x_r.clone()
-        #x_r = F.relu((self.g_fc2(x_r)))# + res2
-        #x_r = self.ln2.forward(x_r)
-        #res3 = x_r.clone()
-        #x_r = F.relu((self.g_fc3(x_r))) + res3
-
-        x_r = F.relu((self.g_fc4(x_r)))
-        x_r = self.ln4.forward(x_r)
-
-        x_g = x_r.view(relations.size(0), relations.size(1) * relations.size(2), -1)
-        x_g = x_g.sum(1).squeeze(1)/num_total_objects
-
-        return x_g
-
-class RelationNetwork2(nn.Module):
-    '''
-    RelationNet
-    '''
-    def __init__(self,hidden_size, output_size):
-        super(RelationNetwork2, self).__init__()
-
-        self.hidden_size = hidden_size
-        self.output_size = output_size
-        self.g_fc1 = torch.nn.Linear(hidden_size, output_size)
-        #self.g_bn1 = torch.nn.BatchNorm1d(num_features=hidden_size)
-        self.ln1 = LayerNorm(d_hid=output_size)
-        #self.g_fc2 = torch.nn.Linear(hidden_size, hidden_size)
-        #self.g_bn2 = torch.nn.BatchNorm1d(num_features=hidden_size)
-        #self.ln2 = LayerNorm(d_hid=hidden_size)
-
-        #self.g_fc3 = torch.nn.Linear(hidden_size, hidden_size)
-        #self.g_bn3 = torch.nn.BatchNorm1d(num_features=hidden_size)
-        #self.ln3 = LayerNorm(d_hid=hidden_size)
-
-        self.g_fc4 = torch.nn.Linear(output_size, output_size)
-        #self.g_bn4 = torch.nn.BatchNorm1d(num_features=output_size)
-        self.ln4 = LayerNorm(d_hid=output_size)
-
-    def forward(self,doc_hiddens, question_hidden):
-        '''
-
-        :param doc_hiddens: batch * input_len * in_channels
-        :param question_hidden: batch * input_len * in_channels
-        :return: batch * output_size
-        '''
-        # Concatenate all available relations
-        num_objects = doc_hiddens.size(1)
-        num_total_objects = num_objects * num_objects
-        x_i = doc_hiddens.unsqueeze(1)
-        x_i = x_i.repeat(1, num_objects, 1, 1)
-        x_j = doc_hiddens.unsqueeze(2)
-        x_j = x_j.repeat(1, 1, num_objects, 1)
-        q = question_hidden.unsqueeze(1).unsqueeze(1).repeat(1, num_objects, num_objects, 1)
-        relations = torch.cat([x_i, x_j, q], 3)
-        #print('relations       :', relations.size())
-        x_r = relations.view(-1,x_i.size(3)+x_j.size(3)+q.size(3))
-        #print('x_r:',x_r.size())
-        #res1 = x_r.clone()
-        #print(self.g_fc1)
-        x_r = F.relu((self.g_fc1(x_r)))# + res1
-        x_r = self.ln1.forward(x_r)
-        #res2 = x_r.clone()
         #x_r = F.relu((self.g_fc2(x_r))) + res2
         #x_r = self.ln2.forward(x_r)
         #res3 = x_r.clone()
@@ -482,7 +421,6 @@ class RelationNetwork2(nn.Module):
         x_g = x_g.sum(1).squeeze(1)/num_total_objects
 
         return x_g
-
 
 class LayerNorm(nn.Module):
     ''' Layer normalization module '''

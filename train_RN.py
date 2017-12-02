@@ -88,7 +88,7 @@ parser.add_argument('--max_len', type=int, default=15)
 parser.add_argument('--rnn_type', default='lstm',
                     help='supported types: rnn, gru, lstm')
 parser.add_argument('--num_objects', type=int, default=10,
-                    help='The number of document objects needed for relationNet.')
+                    help='The number of objects needed for relationNet.')
 parser.add_argument('--reduction_ratio', type=int, default=2,
                     help='reduction_ratio')
 
@@ -167,6 +167,9 @@ def main():
         for i, batch in enumerate(batches):
             model.update(batch)
             if i % args.log_per_updates == 0:
+#               log.info('updates[{0:6}] train loss[{1:.5f}] remaining[{2}]'.format(
+#                   model.updates, model.train_loss.avg,
+#                   str((datetime.now() - start) / (i + 1) * (len(batches) - i - 1)).split('.')[0]))
                 log.info('epoch [{0:2}] updates[{1:6}] train loss[{2:.5f}] remaining[{3}] lr[{4:.4f}]'.format(
                     epoch, model.updates, model.train_loss.avg,
                     str((datetime.now() - start) / (i + 1) * (len(batches) - i - 1)).split('.')[0],
@@ -182,7 +185,7 @@ def main():
             log.warning("dev EM: {} F1: {}".format(em, f1))
         # save
         if not args.save_last_only or epoch == epoch_0 + args.epochs - 1:
-            model_file = os.path.join(model_dir, 'checkpoint.pt')
+            model_file = os.path.join(model_dir, 'checkpoint_epoch.pt')
             model.save(model_file, epoch)
             if f1 > best_val_score:
                 best_val_score = f1
