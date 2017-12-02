@@ -5,7 +5,7 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 import torch
 import torch.nn as nn
-from . import layers_RN as layers
+from . import layers_RN_kmax2 as layers
 
 # Modification: add 'pos' and 'ner' features.
 # Origin: https://github.com/facebookresearch/ParlAI/tree/master/parlai/agents/drqa
@@ -104,18 +104,20 @@ class RnnDocReader(nn.Module):
             raise NotImplementedError('question_merge = %s' % opt['question_merge'])
         if opt['question_merge'] == 'self_attn':
             self.self_attn = layers.LinearSeqAttn(question_hidden_size)
-        self.relationNet = layers.RelationNetwork1(hidden_size=2 * doc_hidden_size, output_size=doc_hidden_size)
+        self.relationNet1 = layers.RelationNetwork1(hidden_size=2 * doc_hidden_size, output_size=doc_hidden_size)
+        self.relationNet2 = layers.RelationNetwork2(hidden_size=3 * doc_hidden_size, output_size=doc_hidden_size)
+
         # doc_attention for maxpooling
         self.doc_attn = layers.BilinearSeqAttn_norm(doc_hidden_size,question_hidden_size)
 
         # Bilinear attention for span start/end
         self.start_attn = layers.BilinearSeqAttn(
             doc_hidden_size,
-            2*question_hidden_size,
+            3*question_hidden_size,
         )
         self.end_attn = layers.BilinearSeqAttn(
             doc_hidden_size,
-            2*question_hidden_size,
+            3*question_hidden_size,
         )
 
     def forward(self, x1, x1_f, x1_pos, x1_ner, x1_mask, x2, x2_mask,x1_order,x2_order):
@@ -181,9 +183,11 @@ class RnnDocReader(nn.Module):
         '''
         Relation Network
         '''
-        doc_question_hidden = self.relationNet.forward(doc_hiddens_compact,question_hiddens)
-        doc_question_hidden = nn.functional.dropout(doc_question_hidden,p=0.2,training=self.training)
-        doc_question_hidden = torch.cat([doc_question_hidden, question_hidden], 1)
+        doc_question_hidden1 = self.relationNet1.forward(doc_hiddens_compact, question_hiddens)
+        doc_question_hidden1 = nn.functional.dropout(doc_question_hidden1,p=0.2,training=self.training)
+        doc_question_hidden2 = self.relationNet2.forward(doc_hiddens_compact, question_hidden)
+        doc_question_hidden2 = nn.functional.dropout(doc_question_hidden2, p=0.2, training=self.training)
+        doc_question_hidden = torch.cat([doc_question_hidden1,  doc_question_hidden2,question_hidden], 1)
         start_scores = self.start_attn.forward(doc_hiddens, doc_question_hidden, x1_mask)
         end_scores = self.end_attn.forward(doc_hiddens, doc_question_hidden, x1_mask)
 

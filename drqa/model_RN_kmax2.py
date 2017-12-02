@@ -11,7 +11,7 @@ import logging
 
 from torch.autograd import Variable
 from .utils import AverageMeter
-from .rnn_reader_RN_kmax import RnnDocReader
+from .rnn_reader_RN_kmax2 import RnnDocReader
 
 # Modification:
 #   - change the logger name
@@ -55,10 +55,10 @@ class DocReaderModel(object):
             raise RuntimeError('Unsupported optimizer: %s' % opt['optimizer'])
         if state_dict:
             self.optimizer.load_state_dict(state_dict['optimizer'])
-	
+
         num_params = sum(p.data.numel() for p in parameters
-            if p.data.data_ptr() != self.network.embedding.weight.data.data_ptr())
-        print ("{} parameters".format(num_params))
+                         if p.data.data_ptr() != self.network.embedding.weight.data.data_ptr())
+        print("{} parameters".format(num_params))
 
     def update(self, ex):
         # Train mode

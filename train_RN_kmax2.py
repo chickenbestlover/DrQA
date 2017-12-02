@@ -11,14 +11,14 @@ from collections import Counter
 import torch
 import msgpack
 import pandas as pd
-from drqa.model_RN_kmax import DocReaderModel
+from drqa.model_RN_kmax2 import DocReaderModel
 from drqa.utils import str2bool
 import numpy as np
 parser = argparse.ArgumentParser(
     description='Train a Document Reader model.'
 )
 # system
-parser.add_argument('--log_file', default='output_kmax.log',
+parser.add_argument('--log_file', default='output_kmax2.log',
                     help='path for log file.')
 parser.add_argument('--log_per_updates', type=int, default=1000,
                     help='log model loss per x updates (mini-batches).')
@@ -182,13 +182,13 @@ def main():
             log.warning("dev EM: {} F1: {}".format(em, f1))
         # save
         if not args.save_last_only or epoch == epoch_0 + args.epochs - 1:
-            model_file = os.path.join(model_dir, 'checkpoint_kmax.pt')
+            model_file = os.path.join(model_dir, 'checkpoint_kmax2.pt')
             model.save(model_file, epoch)
             if f1 > best_val_score:
                 best_val_score = f1
                 copyfile(
                     model_file,
-                    os.path.join(model_dir, 'best_model_kmax.pt'))
+                    os.path.join(model_dir, 'best_model_kmax2.pt'))
                 log.info('[new best model saved.]')
 
 

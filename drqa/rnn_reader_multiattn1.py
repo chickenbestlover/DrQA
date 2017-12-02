@@ -5,8 +5,11 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 import torch
 import torch.nn as nn
-from . import layers_RN as layers
+from . import layers_multiattn1 as layers
 
+from drqa.Layers import EncoderLayer, DecoderLayer, DecoderLayer_end
+import drqa.Constants as Constants
+import numpy as np
 # Modification: add 'pos' and 'ner' features.
 # Origin: https://github.com/facebookresearch/ParlAI/tree/master/parlai/agents/drqa
 
@@ -18,11 +21,30 @@ def normalize_emb_(data):
     data.div_(norms.expand_as(data))
     print (data.size(), data[:10].norm(2,1))
 
+def get_attn_padding_mask(seq_q, seq_k):
+    ''' Indicate the padding-related part to mask '''
+    assert seq_q.dim() == 2 and seq_k.dim() == 2
+    mb_size, len_q = seq_q.size()
+    mb_size, len_k = seq_k.size()
+    pad_attn_mask = seq_k.data.eq(Constants.PAD).unsqueeze(1)   # bx1xsk
+    pad_attn_mask = pad_attn_mask.expand(mb_size, len_q, len_k) # bxsqxsk
+    return pad_attn_mask
+
+def get_attn_subsequent_mask(seq):
+    ''' Get an attention mask to avoid using the subsequent info.'''
+    assert seq.dim() == 2
+    attn_shape = (seq.size(0), seq.size(1), seq.size(1))
+    subsequent_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
+    subsequent_mask = torch.from_numpy(subsequent_mask)
+    if seq.is_cuda:
+        subsequent_mask = subsequent_mask.cuda()
+    return subsequent_mask
+
 class RnnDocReader(nn.Module):
     """Network for the Document Reader module of DrQA."""
     RNN_TYPES = {'lstm': nn.LSTM, 'gru': nn.GRU, 'rnn': nn.RNN}
 
-    def __init__(self, opt, padding_idx=0, embedding=None, normalize_emb=False,embedding_order=True):
+    def __init__(self, opt, padding_idx=0, embedding=None, normalize_emb=False):
         super(RnnDocReader, self).__init__()
         # Store config
         self.opt = opt
@@ -76,7 +98,6 @@ class RnnDocReader(nn.Module):
             dropout_rate=opt['dropout_rnn'],
             dropout_output=opt['dropout_rnn_output'],
             concat_layers=opt['concat_rnn_layers'],
-            rnn_type=self.RNN_TYPES[opt['rnn_type']],
             padding=opt['rnn_padding'],
         )
 
@@ -88,10 +109,9 @@ class RnnDocReader(nn.Module):
             dropout_rate=opt['dropout_rnn'],
             dropout_output=opt['dropout_rnn_output'],
             concat_layers=opt['concat_rnn_layers'],
-            rnn_type=self.RNN_TYPES[opt['rnn_type']],
             padding=opt['rnn_padding'],
         )
-        self.num_object=opt['num_objects']
+
         # Output sizes of rnn encoders
         doc_hidden_size = 2 * opt['hidden_size']
         question_hidden_size = 2 * opt['hidden_size']
@@ -104,21 +124,34 @@ class RnnDocReader(nn.Module):
             raise NotImplementedError('question_merge = %s' % opt['question_merge'])
         if opt['question_merge'] == 'self_attn':
             self.self_attn = layers.LinearSeqAttn(question_hidden_size)
-        self.relationNet = layers.RelationNetwork1(hidden_size=2 * doc_hidden_size, output_size=doc_hidden_size)
-        # doc_attention for maxpooling
-        self.doc_attn = layers.BilinearSeqAttn_norm(doc_hidden_size,question_hidden_size)
 
+        '''
         # Bilinear attention for span start/end
         self.start_attn = layers.BilinearSeqAttn(
             doc_hidden_size,
-            2*question_hidden_size,
+            question_hidden_size,
         )
         self.end_attn = layers.BilinearSeqAttn(
             doc_hidden_size,
-            2*question_hidden_size,
+            question_hidden_size,
         )
+        '''
 
-    def forward(self, x1, x1_f, x1_pos, x1_ner, x1_mask, x2, x2_mask,x1_order,x2_order):
+        self.decoder_start = DecoderLayer_end(doc_hidden_size,
+                                              opt['embedding_dim'] // 2,
+                                              n_head=4,
+                                              d_k=32,
+                                              d_v=32,
+                                              dropout=0.1)
+        self.decoder_end = DecoderLayer_end(doc_hidden_size,
+                                            opt['embedding_dim'] // 2,
+                                            n_head=4,
+                                            d_k=32,
+                                            d_v=32,
+                                            dropout=0.1)
+
+
+    def forward(self, x1, x1_f, x1_pos, x1_ner, x1_mask, x2, x2_mask):
         """Inputs:
         x1 = document word indices             [batch * len_d]
         x1_f = document word features indices  [batch * len_d * nfeat]
@@ -130,9 +163,7 @@ class RnnDocReader(nn.Module):
         """
         # Embed both document and question
         x1_emb = self.embedding(x1)
-        #x1_emb_order = self.embedding_order(x1_order)
         x2_emb = self.embedding(x2)
-        #x2_emb += self.embedding_order(x2_order)
 
         if self.opt['dropout_emb'] > 0:
             x1_emb = nn.functional.dropout(x1_emb, p=self.opt['dropout_emb'],
@@ -160,31 +191,37 @@ class RnnDocReader(nn.Module):
         drnn_input = torch.cat(drnn_input_list, 2)
 
         # Encode document with RNN
-        doc_hiddens = self.doc_rnn.forward(drnn_input, x1_mask)
+        doc_hiddens = self.doc_rnn(drnn_input, x1_mask)
+
         # Encode question with RNN + merge hiddens
-        question_hiddens = self.question_rnn.forward(x2_emb, x2_mask)
-        if self.opt['question_merge'] == 'avg':
-            q_merge_weights = layers.uniform_weights(question_hiddens, x2_mask)
-        elif self.opt['question_merge'] == 'self_attn':
-            q_merge_weights = self.self_attn.forward(question_hiddens, x2_mask)
-        question_hidden = layers.weighted_avg(question_hiddens, q_merge_weights)
+        question_hiddens = self.question_rnn(x2_emb, x2_mask)
+        #if self.opt['question_merge'] == 'avg':
+        #    q_merge_weights = layers.uniform_weights(question_hiddens, x2_mask)
+        #elif self.opt['question_merge'] == 'self_attn':
+        #    q_merge_weights = self.self_attn(question_hiddens, x2_mask)
+        #question_hidden = layers.weighted_avg(question_hiddens, q_merge_weights)
 
+        enc_slf_attn_pad_mask = get_attn_padding_mask(x1, x1)
+        enc_slf_attn_sub_mask = get_attn_subsequent_mask(x1)
+        enc_slf_attn_mask = torch.gt(enc_slf_attn_pad_mask + enc_slf_attn_sub_mask, 0)
+        enc_dec_attn_pad_mask = get_attn_padding_mask(x1, x2)
+        start_scores, *_ = self.decoder_start.forward(dec_input=doc_hiddens,
+                                                enc_output=question_hiddens,
+                                                slf_attn_mask=enc_slf_attn_mask,
+                                                dec_enc_attn_mask=enc_dec_attn_pad_mask
+                                                )
+        end_scores, *_ = self.decoder_end.forward(dec_input=doc_hiddens,
+                                                enc_output=question_hiddens,
+                                                slf_attn_mask=enc_slf_attn_mask,
+                                                dec_enc_attn_mask=enc_dec_attn_pad_mask
 
-        doc_attn_scores = self.doc_attn.forward(doc_hiddens,question_hidden,x1_mask)
-        #print('doc_attn_scores:',doc_attn_scores)
-        idx = layers.kmax_indice(x = doc_attn_scores,dim=1,k=self.num_object)
-        #print('idx:',idx.size())
-        #print('doc_hiddens:',doc_hiddens.size())
-        doc_hiddens_compact = layers.indice_pooling(doc_hiddens, indices=idx)
+                                                )
+        if self.training:
+            start_scores = nn.functional.log_softmax(start_scores)
+            end_scores = nn.functional.log_softmax(end_scores)
 
-
-        '''
-        Relation Network
-        '''
-        doc_question_hidden = self.relationNet.forward(doc_hiddens_compact,question_hiddens)
-        doc_question_hidden = nn.functional.dropout(doc_question_hidden,p=0.2,training=self.training)
-        doc_question_hidden = torch.cat([doc_question_hidden, question_hidden], 1)
-        start_scores = self.start_attn.forward(doc_hiddens, doc_question_hidden, x1_mask)
-        end_scores = self.end_attn.forward(doc_hiddens, doc_question_hidden, x1_mask)
+        else:
+            start_scores = nn.functional.softmax(start_scores)
+            end_scores = nn.functional.softmax(end_scores)
 
         return start_scores, end_scores

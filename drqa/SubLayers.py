@@ -7,7 +7,7 @@ from .Modules import BottleLinear as Linear
 from .Modules import ScaledDotProductAttention
 #from transformer.Modules import BottleLayerNormalization as LayerNormalization
 from .Modules import LayerNormalization
-
+from .Modules import BottleSoftmax
 __author__ = "Yu-Hsiang Huang"
 
 class MultiHeadAttention(nn.Module):
@@ -40,31 +40,32 @@ class MultiHeadAttention(nn.Module):
         n_head = self.n_head
 
         residual = q
-
-        mb_size, len_q, d_model = q.size()
-        mb_size, len_k, d_model = k.size()
-        mb_size, len_v, d_model = v.size()
+        #print('q,k,v:',q.size(),k.size(),v.size())
+        mb_size, len_q, q_hidden_size = q.size()
+        mb_size, len_k, k_hidden_size = k.size()
+        mb_size, len_v, v_hidden_size = v.size()
 
         # treat as a (n_head) size batch
-        q_s = q.repeat(n_head, 1, 1).view(n_head, -1, d_model) # n_head x (mb_size*len_q) x d_model
-        k_s = k.repeat(n_head, 1, 1).view(n_head, -1, d_model) # n_head x (mb_size*len_k) x d_model
-        v_s = v.repeat(n_head, 1, 1).view(n_head, -1, d_model) # n_head x (mb_size*len_v) x d_model
-
+        q_s = q.repeat(n_head, 1, 1).view(n_head, -1, q_hidden_size) # n_head x (mb_size*len_q) x d_model
+        k_s = k.repeat(n_head, 1, 1).view(n_head, -1, k_hidden_size) # n_head x (mb_size*len_k) x d_model
+        v_s = v.repeat(n_head, 1, 1).view(n_head, -1, v_hidden_size) # n_head x (mb_size*len_v) x d_model
+        #print('q_s,k_s,v_s:',q_s.size(),k_s.size(),v_s.size())
+        #print('w_qs',self.w_qs.size())
         # treat the result as a (n_head * mb_size) size batch
         q_s = torch.bmm(q_s, self.w_qs).view(-1, len_q, d_k)   # (n_head*mb_size) x len_q x d_k
         k_s = torch.bmm(k_s, self.w_ks).view(-1, len_k, d_k)   # (n_head*mb_size) x len_k x d_k
         v_s = torch.bmm(v_s, self.w_vs).view(-1, len_v, d_v)   # (n_head*mb_size) x len_v x d_v
 
         # perform attention, result size = (n_head * mb_size) x len_q x d_v
-        attn_mask = attn_mask.unsqueeze(1).repeat(n_head,len_q,1).byte()
+        #print('attn_mask:',attn_mask.size())
         #print(attn_mask)
-        outputs, attns = self.attention(q_s, k_s, v_s, attn_mask=attn_mask)
+        outputs, attns = self.attention.forward(q_s, k_s, v_s, attn_mask=attn_mask.repeat(n_head,1,1))
 
         # back to original mb_size batch, result size = mb_size x len_q x (n_head*d_v)
         outputs = torch.cat(torch.split(outputs, mb_size, dim=0), dim=-1) 
 
         # project back to residual size
-        outputs = self.proj(outputs)
+        outputs = self.proj.forward(outputs)
         outputs = self.dropout(outputs)
 
         return self.layer_norm(outputs + residual), attns
@@ -86,3 +87,22 @@ class PositionwiseFeedForward(nn.Module):
         output = self.w_2(output).transpose(2, 1)
         output = self.dropout(output)
         return self.layer_norm(output + residual)
+
+class PositionwiseFeedForward_end(nn.Module):
+    ''' A two-feed-forward-layer module '''
+
+    def __init__(self, d_hid, d_inner_hid, dropout=0.1):
+        super(PositionwiseFeedForward_end, self).__init__()
+        self.w_1 = nn.Conv1d(d_hid, d_inner_hid, 1) # position-wise
+        self.w_2 = nn.Conv1d(d_inner_hid, 1, 1) # position-wise
+        self.layer_norm = LayerNormalization(d_hid)
+        self.dropout = nn.Dropout(dropout)
+        self.relu = nn.ReLU()
+        self.softmax = BottleSoftmax()
+    def forward(self, x):
+        residual = x
+        output = self.relu(self.w_1(x.transpose(1, 2)))
+        output = self.w_2(output).transpose(2, 1)
+        output = self.dropout(output)
+        #output = self.softmax(output)
+        return output

@@ -298,7 +298,34 @@ class doc_LinearSeqAttn(nn.Module):
 
         scores.data.masked_fill_(x_mask.data, -float('inf'))
         alpha = F.softmax(scores)
-        return alpha
+        return alpha.transpose(1,2)
+
+class doc_LinearSeqAttn2(nn.Module):
+    """Self attention over a sequence:
+    * o_i = softmax(Wx_i) for x_i in X.
+    """
+
+    def __init__(self, input_size, hidden_size, output_size):
+        super(doc_LinearSeqAttn2, self).__init__()
+        self.input_size = input_size
+        self.output_size = output_size
+        self.hidden_size = hidden_size
+        self.linear1 = nn.Linear(input_size, hidden_size)
+        self.linear2 = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x, x_mask):
+        """
+        x = batch * len * input_size
+        x_mask = batch * len
+        """
+        x_flat = x.contiguous().view(-1, x.size(-1)) # x_flat = (batch x len) * input_size
+        hidden = torch.nn.functional.tanh(self.linear1(x_flat)) # hidden = (batch x len) * hidden_size
+        scores = self.linear2(hidden).view(x.size(0), x.size(1), self.output_size) # scores = batch * len * output_size
+        x_mask = x_mask.unsqueeze(2).expand_as(scores)
+
+        scores.data.masked_fill_(x_mask.data, -float('inf'))
+        alpha = F.softmax(scores)
+        return alpha.transpose(1,2)
 
 class LinearSeqAttn_ques(nn.Module):
     """Self attention over a sequence:
@@ -360,12 +387,12 @@ class convEncoder(nn.Module):
         out= torch.transpose(F.relu(self.maxPool(self.conv3(out))), 1, 2)
         return out
 
-class RelationNetwork1(nn.Module):
+class RelationNetwork(nn.Module):
     '''
     RelationNet
     '''
     def __init__(self,hidden_size, output_size):
-        super(RelationNetwork1, self).__init__()
+        super(RelationNetwork, self).__init__()
 
         self.hidden_size = hidden_size
         self.output_size = output_size
@@ -421,69 +448,6 @@ class RelationNetwork1(nn.Module):
         x_g = x_g.sum(1).squeeze(1)/num_total_objects
 
         return x_g
-
-class RelationNetwork2(nn.Module):
-    '''
-    RelationNet
-    '''
-    def __init__(self,hidden_size, output_size):
-        super(RelationNetwork2, self).__init__()
-
-        self.hidden_size = hidden_size
-        self.output_size = output_size
-
-        self.g_fc1 = torch.nn.Linear(hidden_size, output_size)
-        #self.g_bn1 = torch.nn.BatchNorm1d(num_features=hidden_size)
-        self.ln1 = LayerNorm(d_hid=output_size)
-
-        #self.g_fc2 = torch.nn.Linear(output_size, output_size)
-        #self.g_bn2 = torch.nn.BatchNorm1d(num_features=hidden_size)
-        #self.ln2 = LayerNorm(d_hid=output_size)
-
-        #self.g_fc3 = torch.nn.Linear(hidden_size, hidden_size)
-        #self.g_bn3 = torch.nn.BatchNorm1d(num_features=hidden_size)
-        #self.ln3 = LayerNorm(d_hid=hidden_size)
-
-        self.g_fc4 = torch.nn.Linear(output_size, output_size)
-        #self.g_bn4 = torch.nn.BatchNorm1d(num_features=output_size)
-        self.ln4 = LayerNorm(d_hid=output_size)
-
-    def forward(self, doc_hiddens, question_hiddens):
-        '''
-
-        :param doc_hiddens: batch * input_len * in_channels
-        :param question_hiddens: batch * input_len * in_channels
-        :return: batch * output_size
-        '''
-        # Concatenate all available relations
-        num_doc_objects = doc_hiddens.size(1)
-        num_question_objects = question_hiddens.size(1)
-        num_total_objects = num_doc_objects * num_question_objects
-        doc = doc_hiddens.unsqueeze(1)
-        doc = doc.repeat(1, num_question_objects, 1, 1)
-        q = question_hiddens.unsqueeze(2).repeat(1, 1, num_doc_objects, 1)
-        relations = torch.cat([doc, q], 3)
-        #print('relations       :', relations.size())
-        x_r = relations.view(-1,doc.size(3)+q.size(3))
-        #print('x_r:',x_r.size())
-        #res1 = x_r.clone()
-        #print(self.g_fc1)
-        x_r = F.relu((self.g_fc1(x_r)))# + res1
-        x_r = self.ln1.forward(x_r)
-        #res2 = x_r.clone()
-        #x_r = F.relu((self.g_fc2(x_r)))# + res2
-        #x_r = self.ln2.forward(x_r)
-        #res3 = x_r.clone()
-        #x_r = F.relu((self.g_fc3(x_r))) + res3
-
-        x_r = F.relu((self.g_fc4(x_r)))
-        x_r = self.ln4.forward(x_r)
-
-        x_g = x_r.view(relations.size(0), relations.size(1) * relations.size(2), -1)
-        x_g = x_g.sum(1).squeeze(1)/num_total_objects
-
-        return x_g
-
 
 class LayerNorm(nn.Module):
     ''' Layer normalization module '''

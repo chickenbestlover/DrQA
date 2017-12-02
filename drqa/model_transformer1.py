@@ -11,7 +11,7 @@ import logging
 
 from torch.autograd import Variable
 from .utils import AverageMeter
-from .rnn_reader_RN_kmax import RnnDocReader
+from .reader_transformer1 import DocReader
 
 # Modification:
 #   - change the logger name
@@ -34,7 +34,7 @@ class DocReaderModel(object):
         self.train_loss = AverageMeter()
 
         # Building network.
-        self.network = RnnDocReader(opt, embedding=embedding)
+        self.network = DocReader(opt, embedding=embedding)
         if state_dict:
             new_state = set(self.network.state_dict().keys())
             for k in list(state_dict['network'].keys()):

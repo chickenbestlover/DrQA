@@ -431,14 +431,12 @@ class RelationNetwork2(nn.Module):
 
         self.hidden_size = hidden_size
         self.output_size = output_size
-
         self.g_fc1 = torch.nn.Linear(hidden_size, output_size)
         #self.g_bn1 = torch.nn.BatchNorm1d(num_features=hidden_size)
         self.ln1 = LayerNorm(d_hid=output_size)
-
-        #self.g_fc2 = torch.nn.Linear(output_size, output_size)
+        #self.g_fc2 = torch.nn.Linear(hidden_size, hidden_size)
         #self.g_bn2 = torch.nn.BatchNorm1d(num_features=hidden_size)
-        #self.ln2 = LayerNorm(d_hid=output_size)
+        #self.ln2 = LayerNorm(d_hid=hidden_size)
 
         #self.g_fc3 = torch.nn.Linear(hidden_size, hidden_size)
         #self.g_bn3 = torch.nn.BatchNorm1d(num_features=hidden_size)
@@ -448,30 +446,31 @@ class RelationNetwork2(nn.Module):
         #self.g_bn4 = torch.nn.BatchNorm1d(num_features=output_size)
         self.ln4 = LayerNorm(d_hid=output_size)
 
-    def forward(self, doc_hiddens, question_hiddens):
+    def forward(self,doc_hiddens, question_hidden):
         '''
 
         :param doc_hiddens: batch * input_len * in_channels
-        :param question_hiddens: batch * input_len * in_channels
+        :param question_hidden: batch * input_len * in_channels
         :return: batch * output_size
         '''
         # Concatenate all available relations
-        num_doc_objects = doc_hiddens.size(1)
-        num_question_objects = question_hiddens.size(1)
-        num_total_objects = num_doc_objects * num_question_objects
-        doc = doc_hiddens.unsqueeze(1)
-        doc = doc.repeat(1, num_question_objects, 1, 1)
-        q = question_hiddens.unsqueeze(2).repeat(1, 1, num_doc_objects, 1)
-        relations = torch.cat([doc, q], 3)
+        num_objects = doc_hiddens.size(1)
+        num_total_objects = num_objects * num_objects
+        x_i = doc_hiddens.unsqueeze(1)
+        x_i = x_i.repeat(1, num_objects, 1, 1)
+        x_j = doc_hiddens.unsqueeze(2)
+        x_j = x_j.repeat(1, 1, num_objects, 1)
+        q = question_hidden.unsqueeze(1).unsqueeze(1).repeat(1, num_objects, num_objects, 1)
+        relations = torch.cat([x_i, x_j, q], 3)
         #print('relations       :', relations.size())
-        x_r = relations.view(-1,doc.size(3)+q.size(3))
+        x_r = relations.view(-1,x_i.size(3)+x_j.size(3)+q.size(3))
         #print('x_r:',x_r.size())
         #res1 = x_r.clone()
         #print(self.g_fc1)
         x_r = F.relu((self.g_fc1(x_r)))# + res1
         x_r = self.ln1.forward(x_r)
         #res2 = x_r.clone()
-        #x_r = F.relu((self.g_fc2(x_r)))# + res2
+        #x_r = F.relu((self.g_fc2(x_r))) + res2
         #x_r = self.ln2.forward(x_r)
         #res3 = x_r.clone()
         #x_r = F.relu((self.g_fc3(x_r))) + res3

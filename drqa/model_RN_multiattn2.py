@@ -11,7 +11,7 @@ import logging
 
 from torch.autograd import Variable
 from .utils import AverageMeter
-from .rnn_reader_RN_kmax import RnnDocReader
+from .reader_transformer1 import DocReader
 
 # Modification:
 #   - change the logger name
@@ -34,7 +34,7 @@ class DocReaderModel(object):
         self.train_loss = AverageMeter()
 
         # Building network.
-        self.network = RnnDocReader(opt, embedding=embedding)
+        self.network = DocReader(opt, embedding=embedding)
         if state_dict:
             new_state = set(self.network.state_dict().keys())
             for k in list(state_dict['network'].keys()):
@@ -43,7 +43,9 @@ class DocReaderModel(object):
             self.network.load_state_dict(state_dict['network'])
 
         # Building optimizer.
-        parameters = [p for p in self.network.parameters() if p.requires_grad]
+#        parameters = [p for p in self.network.parameters() if p.requires_grad]
+        parameters = [p for p in self.network.get_trainable_parameters() if p.requires_grad]
+
         if opt['optimizer'] == 'sgd':
             self.optimizer = optim.SGD(parameters, opt['learning_rate'],
                                        momentum=opt['momentum'],

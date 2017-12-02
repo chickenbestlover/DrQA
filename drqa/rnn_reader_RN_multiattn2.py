@@ -5,7 +5,8 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 import torch
 import torch.nn as nn
-from . import layers_RN as layers
+from . import layers_RN_multiattn2 as layers
+from .SubLayers import MultiHeadAttention, PositionwiseFeedForward
 
 # Modification: add 'pos' and 'ner' features.
 # Origin: https://github.com/facebookresearch/ParlAI/tree/master/parlai/agents/drqa
@@ -104,18 +105,24 @@ class RnnDocReader(nn.Module):
             raise NotImplementedError('question_merge = %s' % opt['question_merge'])
         if opt['question_merge'] == 'self_attn':
             self.self_attn = layers.LinearSeqAttn(question_hidden_size)
-        self.relationNet = layers.RelationNetwork1(hidden_size=2 * doc_hidden_size, output_size=doc_hidden_size)
+        self.relationNet = layers.RelationNetwork(hidden_size=2 * doc_hidden_size, output_size=doc_hidden_size)
         # doc_attention for maxpooling
-        self.doc_attn = layers.BilinearSeqAttn_norm(doc_hidden_size,question_hidden_size)
-
+        #self.doc_attn = layers.SeqAttnMatch(input_size=doc_hidden_size)
+        self.num_head = opt['num_head']
+        self.doc_attn = MultiHeadAttention(n_head=self.num_head,
+                                           d_model=question_hidden_size,
+                                           d_k=32,
+                                           d_v=32,
+                                           dropout=opt['dropout_emb'])
+        self.doc_pos_ffn = PositionwiseFeedForward(d_hid=question_hidden_size,d_inner_hid=2*question_hidden_size,dropout=opt['dropout_emb'])
         # Bilinear attention for span start/end
         self.start_attn = layers.BilinearSeqAttn(
             doc_hidden_size,
-            2*question_hidden_size,
+            question_hidden_size,
         )
         self.end_attn = layers.BilinearSeqAttn(
             doc_hidden_size,
-            2*question_hidden_size,
+            question_hidden_size,
         )
 
     def forward(self, x1, x1_f, x1_pos, x1_ner, x1_mask, x2, x2_mask,x1_order,x2_order):
@@ -170,12 +177,39 @@ class RnnDocReader(nn.Module):
         question_hidden = layers.weighted_avg(question_hiddens, q_merge_weights)
 
 
-        doc_attn_scores = self.doc_attn.forward(doc_hiddens,question_hidden,x1_mask)
-        #print('doc_attn_scores:',doc_attn_scores)
-        idx = layers.kmax_indice(x = doc_attn_scores,dim=1,k=self.num_object)
+        '''
+        1-dim attention + kmax (k=num_object)
+        '''
+        #doc_attn_score = self.doc_attn.forward(doc_hiddens,question_hidden,x1_mask)  # Batch x seqLen
+        #print('doc_attn_score:',doc_attn_score)
+        #idx = layers.kmax_indice(x = doc_attn_score,dim=1,k=self.num_object)
         #print('idx:',idx.size())
         #print('doc_hiddens:',doc_hiddens.size())
-        doc_hiddens_compact = layers.indice_pooling(doc_hiddens, indices=idx)
+        #doc_hiddens_compact = layers.indice_pooling(doc_hiddens, indices=idx)
+
+        '''
+        m-dim attention1 + dot-product
+        '''
+        #doc_attn_scores = self.doc_attn.forward(doc_hiddens,x1_mask)  # Batch x seqLen x num_object
+        #print('doc_attn_score:',doc_attn_scores)
+        #doc_hiddens_compact = doc_attn_scores.bmm(doc_hiddens)
+
+        '''
+        m-dim attention1 + dot-product
+        '''
+        #doc_attn_scores = self.doc_attn.forward(doc_hiddens, x1_mask)  # Batch x seqLen x num_object
+        # print('doc_attn_score:',doc_attn_scores)
+        #doc_hiddens_compact = doc_attn_scores.bmm(doc_hiddens)
+
+        '''
+        m-dim bi-attention1 + dot-product
+        '''
+        #doc_hiddens_compact = self.doc_attn.forward(question_hiddens,doc_hiddens, x1_mask)  # Batch x questionLen x doc_hidden_size
+        '''
+        m-dim multi-attention1 + dot-product
+        '''
+        doc_hiddens_compact, _ = self.doc_attn.forward(question_hiddens,doc_hiddens,doc_hiddens, x1_mask)  # Batch x questionLen x doc_hidden_size
+        doc_hiddens_compact = self.doc_pos_ffn.forward((doc_hiddens_compact))  # Batch x questionLen x doc_hidden_size
 
 
         '''
@@ -183,7 +217,8 @@ class RnnDocReader(nn.Module):
         '''
         doc_question_hidden = self.relationNet.forward(doc_hiddens_compact,question_hiddens)
         doc_question_hidden = nn.functional.dropout(doc_question_hidden,p=0.2,training=self.training)
-        doc_question_hidden = torch.cat([doc_question_hidden, question_hidden], 1)
+        #doc_question_hidden = torch.cat([doc_question_hidden, question_hidden], 1)
+
         start_scores = self.start_attn.forward(doc_hiddens, doc_question_hidden, x1_mask)
         end_scores = self.end_attn.forward(doc_hiddens, doc_question_hidden, x1_mask)
 

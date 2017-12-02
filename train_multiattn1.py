@@ -11,14 +11,14 @@ from collections import Counter
 import torch
 import msgpack
 import pandas as pd
-from drqa.model_RN_kmax import DocReaderModel
+from drqa.model_multiattn1 import DocReaderModel
 from drqa.utils import str2bool
 import numpy as np
 parser = argparse.ArgumentParser(
     description='Train a Document Reader model.'
 )
 # system
-parser.add_argument('--log_file', default='output_kmax.log',
+parser.add_argument('--log_file', default='output.log',
                     help='path for log file.')
 parser.add_argument('--log_per_updates', type=int, default=1000,
                     help='log model loss per x updates (mini-batches).')
@@ -36,7 +36,7 @@ parser.add_argument("--cuda", type=str2bool, nargs='?',
                     const=True, default=torch.cuda.is_available(),
                     help='whether to use GPU acceleration.')
 # training
-parser.add_argument('-e', '--epochs', type=int, default=200)
+parser.add_argument('-e', '--epochs', type=int, default=80)
 parser.add_argument('-bs', '--batch_size', type=int, default=32)
 parser.add_argument('-rs', '--resume', default='',
                     help='previous model file name (in `model_dir`). '
@@ -85,12 +85,13 @@ parser.add_argument('--dropout_rnn', type=float, default=0.2)
 parser.add_argument('--dropout_rnn_output', type=str2bool, nargs='?',
                     const=True, default=True)
 parser.add_argument('--max_len', type=int, default=15)
-parser.add_argument('--rnn_type', default='lstm',
-                    help='supported types: rnn, gru, lstm')
-parser.add_argument('--num_objects', type=int, default=10,
-                    help='The number of document objects needed for relationNet.')
-parser.add_argument('--reduction_ratio', type=int, default=2,
-                    help='reduction_ratio')
+parser.add_argument('--rnn_type', default='sru',
+                    help='supported types: sru')
+parser.add_argument('--reduction_ratio', default='6',
+                    help='reduction ratio need by 1by1-convolution')
+parser.add_argument('--num_objects', default='25',
+                    help='#of objects for relational reasoning')
+
 
 args = parser.parse_args()
 
@@ -156,17 +157,17 @@ def main():
     else:
         best_val_score = 0.0
 
-    print(opt)
-
     for epoch in range(epoch_0, epoch_0 + args.epochs):
         log.warning('Epoch {}'.format(epoch))
         # train
         batches = BatchGen(train, batch_size=args.batch_size, gpu=args.cuda)
         start = datetime.now()
-
         for i, batch in enumerate(batches):
             model.update(batch)
             if i % args.log_per_updates == 0:
+#               log.info('updates[{0:6}] train loss[{1:.5f}] remaining[{2}]'.format(
+#                   model.updates, model.train_loss.avg,
+#                   str((datetime.now() - start) / (i + 1) * (len(batches) - i - 1)).split('.')[0]))
                 log.info('epoch [{0:2}] updates[{1:6}] train loss[{2:.5f}] remaining[{3}] lr[{4:.4f}]'.format(
                     epoch, model.updates, model.train_loss.avg,
                     str((datetime.now() - start) / (i + 1) * (len(batches) - i - 1)).split('.')[0],
@@ -182,13 +183,13 @@ def main():
             log.warning("dev EM: {} F1: {}".format(em, f1))
         # save
         if not args.save_last_only or epoch == epoch_0 + args.epochs - 1:
-            model_file = os.path.join(model_dir, 'checkpoint_kmax.pt')
+            model_file = os.path.join(model_dir, 'checkpoint_epoch_{}.pt'.format(epoch))
             model.save(model_file, epoch)
             if f1 > best_val_score:
                 best_val_score = f1
                 copyfile(
                     model_file,
-                    os.path.join(model_dir, 'best_model_kmax.pt'))
+                    os.path.join(model_dir, 'best_model.pt'))
                 log.info('[new best model saved.]')
 
 
@@ -271,11 +272,9 @@ class BatchGen:
 
             context_len = max(len(x) for x in batch[0])
             context_id = torch.LongTensor(batch_size, context_len).fill_(0)
-            context_order = torch.LongTensor(batch_size,context_len).fill_(0)
 
             for i, doc in enumerate(batch[0]):
                 context_id[i, :len(doc)] = torch.LongTensor(doc)
-                context_order[i,:len(doc)] = torch.from_numpy(np.arange(1,len(doc)+1))
             feature_len = len(batch[1][0][0])
             context_feature = torch.Tensor(batch_size, context_len, feature_len).fill_(0)
             for i, doc in enumerate(batch[1]):
@@ -291,10 +290,8 @@ class BatchGen:
                 context_ent[i, :len(doc)] = torch.LongTensor(doc)
             question_len = max(len(x) for x in batch[4])
             question_id = torch.LongTensor(batch_size, question_len).fill_(0)
-            question_order = torch.LongTensor(batch_size,question_len).fill_(0)
             for i, doc in enumerate(batch[4]):
                 question_id[i, :len(doc)] = torch.LongTensor(doc)
-                question_order[i,:len(doc)] = torch.from_numpy(np.arange(1,len(doc)+1))
 
             context_mask = torch.eq(context_id, 0)
             question_mask = torch.eq(question_id, 0)
@@ -311,15 +308,12 @@ class BatchGen:
                 context_mask = context_mask.pin_memory()
                 question_id = question_id.pin_memory()
                 question_mask = question_mask.pin_memory()
-                context_order = context_order.pin_memory()
-                question_order = question_order.pin_memory()
-
             if self.eval:
                 yield (context_id, context_feature, context_tag, context_ent, context_mask,
-                       question_id, question_mask, context_order, question_order, text, span)
+                       question_id, question_mask, text, span)
             else:
                 yield (context_id, context_feature, context_tag, context_ent, context_mask,
-                       question_id, question_mask, context_order, question_order, y_s, y_e, text, span)
+                       question_id, question_mask, y_s, y_e, text, span)
 
 
 def _normalize_answer(s):
