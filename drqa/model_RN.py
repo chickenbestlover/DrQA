@@ -3,15 +3,15 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
-import torch
-import torch.optim as optim
-import torch.nn.functional as F
-import numpy as np
 import logging
-
+import numpy as np
+import torch
+import torch.nn.functional as F
+import torch.optim as optim
 from torch.autograd import Variable
+from .rnn_reader_RN_q_2 import RnnDocReader
 from .utils import AverageMeter
-from .rnn_reader_RN import RnnDocReader
+
 
 # Modification:
 #   - change the logger name
