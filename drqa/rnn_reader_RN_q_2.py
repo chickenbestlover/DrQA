@@ -68,11 +68,11 @@ class RnnDocReader(nn.Module):
         if opt['ner']:
             doc_input_size += opt['ner_dim']
 
-        self.attention_rnns= custom.AttentionRNN(opt,doc_input_size=doc_input_size)
+        self.attention_rnns= custom.AttentionRNN(opt,doc_input_size=doc_input_size,ratio=opt['reduction_ratio'])
 
         # Output sizes of rnn encoders
-        doc_hidden_size = 2 * opt['hidden_size'] +opt['hidden_size']//4
-        question_hidden_size =  2 * opt['hidden_size']+opt['hidden_size']//4
+        doc_hidden_size = 2 * opt['hidden_size'] +opt['hidden_size']//opt['reduction_ratio']
+        question_hidden_size =  2 * opt['hidden_size']+opt['hidden_size']//opt['reduction_ratio']
 
         # Question merging
         if opt['question_merge'] not in ['avg', 'self_attn']:

@@ -20,7 +20,7 @@ import numpy as np
 
 
 class AttentionRNN(nn.Module):
-    def __init__(self, opt, doc_input_size):
+    def __init__(self, opt, doc_input_size,ratio=2):
         super(AttentionRNN, self).__init__()
         self.doc_rnns = nn.ModuleList()
         self.question_rnns = nn.ModuleList()
@@ -31,10 +31,11 @@ class AttentionRNN(nn.Module):
 
         self.question_convs=nn.ModuleList()
         self.num_layers = opt['doc_layers']
+        self.ratio=ratio
         for i in range(self.num_layers):
 
-            doc_input_size = doc_input_size if i == 0 else 2 * opt['hidden_size']+opt['hidden_size']//4
-            question_input_size = opt['embedding_dim'] if i == 0 else 2 * opt['hidden_size']+opt['hidden_size']//4
+            doc_input_size = doc_input_size if i == 0 else 2 * opt['hidden_size']+opt['hidden_size']//ratio
+            question_input_size = opt['embedding_dim'] if i == 0 else 2 * opt['hidden_size']+opt['hidden_size']//ratio
 
             self.doc_rnns.append(layers.StackedBRNN(
             input_size=doc_input_size,
@@ -51,9 +52,9 @@ class AttentionRNN(nn.Module):
 
             self.doc_attns.append(layers.SeqAttnMatch(input_size=2 * opt['hidden_size']))
             self.question_attns.append(layers.SeqAttnMatch(input_size=2 * opt['hidden_size']))
-            self.doc_convs.append(layers.Conv1by1DimReduce(in_channels=2 * opt['hidden_size'], out_channels=opt['hidden_size'] // 4))
+            self.doc_convs.append(layers.Conv1by1DimReduce(in_channels=2 * opt['hidden_size'], out_channels=opt['hidden_size'] // ratio))
 
-            self.question_convs.append(layers.Conv1by1DimReduce(in_channels=2 * opt['hidden_size'], out_channels=opt['hidden_size'] // 4))
+            self.question_convs.append(layers.Conv1by1DimReduce(in_channels=2 * opt['hidden_size'], out_channels=opt['hidden_size'] // ratio))
 
     def forward(self, x1, x1_mask, x2, x2_mask):
 
