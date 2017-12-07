@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
-
+import torch.nn.init as init
 # Origin: https://github.com/facebookresearch/ParlAI/tree/master/parlai/agents/drqa
 
 # ------------------------------------------------------------------------------
@@ -198,6 +198,61 @@ class SeqAttnMatch(nn.Module):
         matched_seq = alpha.bmm(y)
         return matched_seq
 
+class multiSeqAttnMatch(nn.Module):
+    """Given sequences X and Y, match sequence Y to each element in X.
+    * o_i = sum(alpha_j * y_j) for i in X
+    * alpha_j = softmax(y_j * x_i)
+    """
+    def __init__(self, input_size,n_head=4, identity=False):
+        super(multiSeqAttnMatch, self).__init__()
+
+        self.hidden_size = input_size // n_head
+        self.w = nn.Parameter(torch.FloatTensor(n_head, input_size, self.hidden_size))
+        init.xavier_normal(self.w)
+        self.n_head = n_head
+    def forward(self, x, y, y_mask):
+        """Input shapes:
+            x = batch * len1 * h
+            y = batch * len2 * h
+            y_mask = batch * len2
+        Output shapes:
+            matched_seq = batch * len1 * h
+        """
+        # Project vectors
+        x_s = x.repeat(self.n_head,1,1).view(self.n_head,-1,x.size(2)) # n_head * (batch x len1) * input_size
+        #print('y', y.size())
+        y_s = y.repeat(self.n_head, 1, 1).view(self.n_head, -1, y.size(2)) # n_head * (batch x len2) * input_size
+        #print('y_s', y_s.size())
+        x_s = torch.bmm(x_s,self.w) # n_head * (batch x len1) * hidden_size
+        y_s = torch.bmm(y_s, self.w)  # n_head * (batch x len2) * hidden_size
+        #print('y_s',y_s.size())
+        x_s = x_s.view(-1,x.size(1),self.hidden_size) # (n_head x batch) * len1 * hhidden_size
+        y_s = y_s.view(-1, y.size(1), self.hidden_size) # (n_head x batch) * len2 * hidden_size
+        #print('y_s', y_s.size())
+        #x_proj = self.linear(x.view(-1, x.size(2))).view(x.size())
+        x_s_proj = F.relu(x_s)
+        #y_proj = self.linear(y.view(-1, y.size(2))).view(y.size())
+        y_s_proj = F.relu(y_s)
+
+        # Compute scores
+        scores = x_s_proj.bmm(y_s_proj.transpose(2, 1)) # (n_head x batch) * len1 * len2
+
+        # Mask padding
+        y_mask = y_mask.unsqueeze(1).repeat(self.n_head,x.size(1),1)
+        #print('y_mask:',y_mask.size())
+        #print('scores:', scores.size())
+
+        scores.data.masked_fill_(y_mask.data, -float('inf'))
+
+        # Normalize with softmax
+        alpha_flat = F.softmax(scores.view(-1, y.size(1)))
+        alpha = alpha_flat.view(-1, x.size(1), y.size(1))
+
+        # Take weighted average
+        matched_seq = alpha.bmm(y_s) # (n_head x batch) * len1 * hidden_size
+        matched_seq = torch.cat(torch.split(matched_seq,x.size(0),dim=0),dim=-1) # batch x len1 x (n_head * hidden_size)
+
+        return matched_seq
 
 class BilinearSeqAttn(nn.Module):
     """A bilinear attention layer over a sequence X w.r.t y:

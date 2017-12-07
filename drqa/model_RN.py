@@ -9,7 +9,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
-from .rnn_reader_RN_q_2 import RnnDocReader
+from .rnn_reader_RN_q_3 import RnnDocReader
 from .utils import AverageMeter
 
 

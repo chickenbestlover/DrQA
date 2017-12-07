@@ -38,10 +38,10 @@ parser.add_argument("--cuda", type=str2bool, nargs='?',
 # training
 parser.add_argument('-e', '--epochs', type=int, default=200)
 parser.add_argument('-bs', '--batch_size', type=int, default=32)
-parser.add_argument('-rs', '--resume', default='',
+parser.add_argument('-rs', '--resume', default='best_model.pt',
                     help='previous model file name (in `model_dir`). '
                          'e.g. "checkpoint_epoch_11.pt"')
-parser.add_argument('-ro', '--resume_options', action='store_true',
+parser.add_argument('-ro', '--resume_options', action='store_true',default=True,
                     help='use previous model options, ignore the cli and defaults.')
 parser.add_argument('-rlr', '--reduce_lr', type=float, default=0.,
                     help='reduce initial (resumed) learning rate by this factor.')
@@ -122,80 +122,6 @@ fh.setFormatter(formatter)
 ch.setFormatter(formatter)
 log.addHandler(fh)
 log.addHandler(ch)
-
-
-def main():
-    log.info('[program starts.]')
-    train, dev, dev_y, embedding, opt = load_data(vars(args))
-    log.info('[Data loaded.]')
-
-    if args.resume:
-        log.info('[loading previous model...]')
-        checkpoint = torch.load(os.path.join(model_dir, args.resume))
-        if args.resume_options:
-            opt = checkpoint['config']
-        state_dict = checkpoint['state_dict']
-        model = DocReaderModel(opt, embedding, state_dict)
-        epoch_0 = checkpoint['epoch'] + 1
-        for i in range(checkpoint['epoch']):
-            random.shuffle(list(range(len(train))))  # synchronize random seed
-        if args.reduce_lr:
-            lr_decay(model.optimizer, lr_decay=args.reduce_lr)
-    else:
-        model = DocReaderModel(opt, embedding)
-        epoch_0 = 1
-
-    if args.cuda:
-        model.cuda()
-
-    if args.resume:
-        batches = BatchGen(dev, batch_size=1, evaluation=True, gpu=args.cuda)
-        predictions = []
-        for batch in batches:
-            predictions.extend(model.predict(batch))
-        em, f1 = score(predictions, dev_y)
-        log.info("[dev EM: {} F1: {}]".format(em, f1))
-        best_val_score = f1
-    else:
-        best_val_score = 0.0
-
-    print(opt)
-
-    for epoch in range(epoch_0, epoch_0 + args.epochs):
-        log.warning('Epoch {}'.format(epoch))
-        # train
-        batches = BatchGen(train, batch_size=args.batch_size, gpu=args.cuda)
-        start = datetime.now()
-
-        for i, batch in enumerate(batches):
-            model.update(batch)
-            if i % args.log_per_updates == 0:
-#               log.info('updates[{0:6}] train loss[{1:.5f}] remaining[{2}]'.format(
-#                   model.updates, model.train_loss.avg,
-#                   str((datetime.now() - start) / (i + 1) * (len(batches) - i - 1)).split('.')[0]))
-                log.info('epoch [{0:2}] updates[{1:6}] train loss[{2:.5f}] remaining[{3}] lr[{4:.4f}]'.format(
-                    epoch, model.updates, model.train_loss.avg,
-                    str((datetime.now() - start) / (i + 1) * (len(batches) - i - 1)).split('.')[0],
-                    model.optimizer.state_dict()['param_groups'][0]['lr']))
-
-        # eval
-        if epoch % args.eval_per_epoch == 0:
-            batches = BatchGen(dev, batch_size=1, evaluation=True, gpu=args.cuda)
-            predictions = []
-            for batch in batches:
-                predictions.extend(model.predict(batch))
-            em, f1 = score(predictions, dev_y)
-            log.warning("dev EM: {} F1: {}".format(em, f1))
-        # save
-        if not args.save_last_only or epoch == epoch_0 + args.epochs - 1:
-            model_file = os.path.join(model_dir, 'checkpoint_epoch.pt')
-            model.save(model_file, epoch)
-            if f1 > best_val_score:
-                best_val_score = f1
-                copyfile(
-                    model_file,
-                    os.path.join(model_dir, 'best_model.pt'))
-                log.info('[new best model saved.]')
 
 
 def lr_decay(optimizer, lr_decay):
@@ -384,5 +310,36 @@ def score(pred, truth):
     f1 = 100. * f1 / total
     return em, f1
 
-if __name__ == '__main__':
-    main()
+'''
+Main
+'''
+
+log.info('[program starts.]')
+train, dev, dev_y, embedding, opt = load_data(vars(args))
+log.info('[Data loaded.]')
+
+log.info('[loading previous model...]')
+checkpoint = torch.load(os.path.join(model_dir, args.resume))
+if args.resume_options:
+    opt = checkpoint['config']
+state_dict = checkpoint['state_dict']
+model = DocReaderModel(opt, embedding, state_dict)
+epoch_0 = checkpoint['epoch'] + 1
+for i in range(checkpoint['epoch']):
+    random.shuffle(list(range(len(train))))  # synchronize random seed
+if args.reduce_lr:
+    lr_decay(model.optimizer, lr_decay=args.reduce_lr)
+
+if args.cuda:
+    model.cuda()
+
+print(opt)
+num_test_samples=50
+
+batches = list(BatchGen(dev, batch_size=1, evaluation=True, gpu=args.cuda))
+predictions = []
+for batch in batches[:num_test_samples]:
+    predictions.extend(model.predict(batch))
+
+em, f1 = score(predictions, dev_y[:num_test_samples])
+log.warning("dev EM: {} F1: {}".format(em, f1))

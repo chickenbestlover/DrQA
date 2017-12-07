@@ -1,0 +1,449 @@
+11/25/2017 08:33:36 [program starts.]
+11/25/2017 08:34:13 [Data loaded.]
+11/25/2017 08:34:15 Epoch 1
+11/25/2017 08:34:16 epoch [ 1] updates[     1] train loss[2629.36084] remaining[0:41:08] lr[0.0010]
+11/25/2017 08:38:11 epoch [ 1] updates[  1001] train loss[57.05649] remaining[0:06:41] lr[0.0010]
+11/25/2017 08:42:05 epoch [ 1] updates[  2001] train loss[33.45155] remaining[0:02:43] lr[0.0010]
+11/25/2017 08:46:03 dev EM: 25.8561967833491 F1: 36.90796688209853
+11/25/2017 08:46:04 [new best model saved.]
+11/25/2017 08:46:04 Epoch 2
+11/25/2017 08:46:05 epoch [ 2] updates[  2698] train loss[26.71363] remaining[0:10:29] lr[0.0010]
+11/25/2017 08:49:59 epoch [ 2] updates[  3698] train loss[21.25949] remaining[0:06:37] lr[0.0010]
+11/25/2017 08:53:51 epoch [ 2] updates[  4698] train loss[17.99425] remaining[0:02:42] lr[0.0010]
+11/25/2017 08:57:52 dev EM: 41.84484389782403 F1: 54.00496737522807
+11/25/2017 08:57:54 [new best model saved.]
+11/25/2017 08:57:54 Epoch 3
+11/25/2017 08:57:54 epoch [ 3] updates[  5395] train loss[16.39407] remaining[0:10:07] lr[0.0010]
+11/25/2017 09:01:46 epoch [ 3] updates[  6395] train loss[14.66542] remaining[0:06:32] lr[0.0010]
+11/25/2017 09:05:36 epoch [ 3] updates[  7395] train loss[13.37680] remaining[0:02:40] lr[0.0010]
+11/25/2017 09:09:40 dev EM: 46.14947965941344 F1: 58.45941696812139
+11/25/2017 09:09:41 [new best model saved.]
+11/25/2017 09:09:41 Epoch 4
+11/25/2017 09:09:41 epoch [ 4] updates[  8092] train loss[12.65933] remaining[0:12:51] lr[0.0010]
+11/25/2017 09:13:36 epoch [ 4] updates[  9092] train loss[11.80119] remaining[0:06:38] lr[0.0010]
+11/25/2017 09:17:29 epoch [ 4] updates[ 10092] train loss[11.10507] remaining[0:02:42] lr[0.0010]
+11/25/2017 09:21:31 dev EM: 47.80510879848628 F1: 60.79802872691451
+11/25/2017 09:21:33 [new best model saved.]
+11/25/2017 09:21:33 Epoch 5
+11/25/2017 09:21:33 epoch [ 5] updates[ 10789] train loss[10.68905] remaining[0:10:41] lr[0.0010]
+11/25/2017 09:25:27 epoch [ 5] updates[ 11789] train loss[10.17021] remaining[0:06:35] lr[0.0010]
+11/25/2017 09:29:24 epoch [ 5] updates[ 12789] train loss[9.72879] remaining[0:02:43] lr[0.0010]
+11/25/2017 09:33:26 dev EM: 51.20151371807001 F1: 63.266450870412925
+11/25/2017 09:33:28 [new best model saved.]
+11/25/2017 09:33:28 Epoch 6
+11/25/2017 09:33:28 epoch [ 6] updates[ 13486] train loss[9.45539] remaining[0:10:37] lr[0.0010]
+11/25/2017 09:37:24 epoch [ 6] updates[ 14486] train loss[9.10692] remaining[0:06:40] lr[0.0010]
+11/25/2017 09:41:24 epoch [ 6] updates[ 15486] train loss[8.79732] remaining[0:02:45] lr[0.0010]
+11/25/2017 09:45:25 dev EM: 53.604541154210025 F1: 64.91026985297896
+11/25/2017 09:45:26 [new best model saved.]
+11/25/2017 09:45:26 Epoch 7
+11/25/2017 09:45:27 epoch [ 7] updates[ 16183] train loss[8.60347] remaining[0:11:03] lr[0.0010]
+11/25/2017 09:49:19 epoch [ 7] updates[ 17183] train loss[8.34913] remaining[0:06:34] lr[0.0010]
+11/25/2017 09:53:07 epoch [ 7] updates[ 18183] train loss[8.12251] remaining[0:02:40] lr[0.0010]
+11/25/2017 09:57:01 dev EM: 54.74929044465468 F1: 65.4451738068195
+11/25/2017 09:57:02 [new best model saved.]
+11/25/2017 09:57:02 Epoch 8
+11/25/2017 09:57:02 epoch [ 8] updates[ 18880] train loss[7.97648] remaining[0:10:46] lr[0.0010]
+11/25/2017 10:00:50 epoch [ 8] updates[ 19880] train loss[7.78159] remaining[0:06:26] lr[0.0010]
+11/25/2017 10:04:38 epoch [ 8] updates[ 20880] train loss[7.60571] remaining[0:02:38] lr[0.0010]
+11/25/2017 10:08:36 dev EM: 54.00189214758751 F1: 66.35913218743725
+11/25/2017 10:08:37 [new best model saved.]
+11/25/2017 10:08:37 Epoch 9
+11/25/2017 10:08:38 epoch [ 9] updates[ 21577] train loss[7.49186] remaining[0:11:45] lr[0.0010]
+11/25/2017 10:12:34 epoch [ 9] updates[ 22577] train loss[7.33847] remaining[0:06:40] lr[0.0010]
+11/25/2017 10:16:28 epoch [ 9] updates[ 23577] train loss[7.19654] remaining[0:02:43] lr[0.0010]
+11/25/2017 10:20:28 dev EM: 56.253547776726585 F1: 66.61259648766743
+11/25/2017 10:20:30 [new best model saved.]
+11/25/2017 10:20:30 Epoch 10
+11/25/2017 10:20:30 epoch [10] updates[ 24274] train loss[7.10259] remaining[0:10:34] lr[0.0010]
+11/25/2017 10:24:25 epoch [10] updates[ 25274] train loss[6.97681] remaining[0:06:38] lr[0.0010]
+11/25/2017 10:28:19 epoch [10] updates[ 26274] train loss[6.85918] remaining[0:02:43] lr[0.0010]
+11/25/2017 10:32:17 dev EM: 57.57805108798486 F1: 68.12837817602872
+11/25/2017 10:32:18 [new best model saved.]
+11/25/2017 10:32:18 Epoch 11
+11/25/2017 10:32:19 epoch [11] updates[ 26971] train loss[6.78168] remaining[0:10:23] lr[0.0010]
+11/25/2017 10:36:06 epoch [11] updates[ 27971] train loss[6.67570] remaining[0:06:25] lr[0.0010]
+11/25/2017 10:39:54 epoch [11] updates[ 28971] train loss[6.57703] remaining[0:02:38] lr[0.0010]
+11/25/2017 10:43:51 dev EM: 58.126773888363296 F1: 68.39207057024772
+11/25/2017 10:43:53 [new best model saved.]
+11/25/2017 10:43:53 Epoch 12
+11/25/2017 10:43:53 epoch [12] updates[ 29668] train loss[6.51296] remaining[0:10:50] lr[0.0010]
+11/25/2017 10:47:48 epoch [12] updates[ 30668] train loss[6.42303] remaining[0:06:38] lr[0.0010]
+11/25/2017 10:51:40 epoch [12] updates[ 31668] train loss[6.33919] remaining[0:02:42] lr[0.0010]
+11/25/2017 10:55:35 dev EM: 58.35383159886471 F1: 68.79596140977351
+11/25/2017 10:55:37 [new best model saved.]
+11/25/2017 10:55:37 Epoch 13
+11/25/2017 10:55:37 epoch [13] updates[ 32365] train loss[6.28370] remaining[0:11:19] lr[0.0010]
+11/25/2017 10:59:31 epoch [13] updates[ 33365] train loss[6.20603] remaining[0:06:36] lr[0.0010]
+11/25/2017 11:03:20 epoch [13] updates[ 34365] train loss[6.13344] remaining[0:02:41] lr[0.0010]
+11/25/2017 11:07:22 dev EM: 59.063386944181644 F1: 69.42908718120276
+11/25/2017 11:07:24 [new best model saved.]
+11/25/2017 11:07:24 Epoch 14
+11/25/2017 11:07:24 epoch [14] updates[ 35062] train loss[6.08459] remaining[0:11:10] lr[0.0010]
+11/25/2017 11:11:13 epoch [14] updates[ 36062] train loss[6.01749] remaining[0:06:29] lr[0.0010]
+11/25/2017 11:15:01 epoch [14] updates[ 37062] train loss[5.95366] remaining[0:02:39] lr[0.0010]
+11/25/2017 11:18:58 dev EM: 59.47019867549669 F1: 69.67107031238059
+11/25/2017 11:18:59 [new best model saved.]
+11/25/2017 11:18:59 Epoch 15
+11/25/2017 11:19:00 epoch [15] updates[ 37759] train loss[5.91053] remaining[0:11:35] lr[0.0010]
+11/25/2017 11:22:48 epoch [15] updates[ 38759] train loss[5.85177] remaining[0:06:26] lr[0.0010]
+11/25/2017 11:26:35 epoch [15] updates[ 39759] train loss[5.79368] remaining[0:02:38] lr[0.0010]
+11/25/2017 11:30:27 dev EM: 58.73226111636708 F1: 68.83733051795245
+11/25/2017 11:30:28 Epoch 16
+11/25/2017 11:30:29 epoch [16] updates[ 40456] train loss[5.75626] remaining[0:11:18] lr[0.0010]
+11/25/2017 11:34:23 epoch [16] updates[ 41456] train loss[5.70340] remaining[0:06:38] lr[0.0010]
+11/25/2017 11:38:19 epoch [16] updates[ 42456] train loss[5.65210] remaining[0:02:43] lr[0.0010]
+11/25/2017 11:42:23 dev EM: 60.567644276253546 F1: 70.45825762691871
+11/25/2017 11:42:25 [new best model saved.]
+11/25/2017 11:42:25 Epoch 17
+11/25/2017 11:42:25 epoch [17] updates[ 43153] train loss[5.61789] remaining[0:11:08] lr[0.0010]
+11/25/2017 11:46:20 epoch [17] updates[ 44153] train loss[5.56968] remaining[0:06:38] lr[0.0010]
+11/25/2017 11:50:15 epoch [17] updates[ 45153] train loss[5.52372] remaining[0:02:43] lr[0.0010]
+11/25/2017 11:54:21 dev EM: 60.946073793755914 F1: 71.05686601551135
+11/25/2017 11:54:22 [new best model saved.]
+11/25/2017 11:54:22 Epoch 18
+11/25/2017 11:54:23 epoch [18] updates[ 45850] train loss[5.49263] remaining[0:11:49] lr[0.0010]
+11/25/2017 11:58:23 epoch [18] updates[ 46850] train loss[5.44932] remaining[0:06:47] lr[0.0010]
+11/26/2017 12:02:17 epoch [18] updates[ 47850] train loss[5.40763] remaining[0:02:44] lr[0.0010]
+11/26/2017 12:06:20 dev EM: 61.173131504257334 F1: 71.07491059088372
+11/26/2017 12:06:22 [new best model saved.]
+11/26/2017 12:06:22 Epoch 19
+11/26/2017 12:06:22 epoch [19] updates[ 48547] train loss[5.37958] remaining[0:10:30] lr[0.0010]
+11/26/2017 12:10:22 epoch [19] updates[ 49547] train loss[5.33994] remaining[0:06:47] lr[0.0010]
+11/26/2017 12:14:20 epoch [19] updates[ 50547] train loss[5.30158] remaining[0:02:46] lr[0.0010]
+11/26/2017 12:18:25 dev EM: 60.936613055818356 F1: 71.3184485806814
+11/26/2017 12:18:27 [new best model saved.]
+11/26/2017 12:18:27 Epoch 20
+11/26/2017 12:18:27 epoch [20] updates[ 51244] train loss[5.27539] remaining[0:12:32] lr[0.0010]
+11/26/2017 12:22:28 epoch [20] updates[ 52244] train loss[5.23856] remaining[0:06:48] lr[0.0010]
+11/26/2017 12:26:27 epoch [20] updates[ 53244] train loss[5.20306] remaining[0:02:46] lr[0.0010]
+11/26/2017 12:30:31 dev EM: 60.586565752128664 F1: 71.11878957622193
+11/26/2017 12:30:32 Epoch 21
+11/26/2017 12:30:32 epoch [21] updates[ 53941] train loss[5.17902] remaining[0:10:17] lr[0.0010]
+11/26/2017 12:34:31 epoch [21] updates[ 54941] train loss[5.14495] remaining[0:06:45] lr[0.0010]
+11/26/2017 12:38:29 epoch [21] updates[ 55941] train loss[5.11174] remaining[0:02:46] lr[0.0010]
+11/26/2017 12:42:31 dev EM: 62.27057710501419 F1: 72.16158790118625
+11/26/2017 12:42:32 [new best model saved.]
+11/26/2017 12:42:32 Epoch 22
+11/26/2017 12:42:32 epoch [22] updates[ 56638] train loss[5.08936] remaining[0:10:11] lr[0.0010]
+11/26/2017 12:46:26 epoch [22] updates[ 57638] train loss[5.05774] remaining[0:06:36] lr[0.0010]
+11/26/2017 12:50:20 epoch [22] updates[ 58638] train loss[5.02680] remaining[0:02:42] lr[0.0010]
+11/26/2017 12:54:20 dev EM: 62.95175023651845 F1: 72.1244650914057
+11/26/2017 12:54:21 Epoch 23
+11/26/2017 12:54:21 epoch [23] updates[ 59335] train loss[5.00578] remaining[0:10:28] lr[0.0010]
+11/26/2017 12:58:16 epoch [23] updates[ 60335] train loss[4.97590] remaining[0:06:37] lr[0.0010]
+11/26/2017 01:02:09 epoch [23] updates[ 61335] train loss[4.94681] remaining[0:02:42] lr[0.0010]
+11/26/2017 01:06:08 dev EM: 62.80983916745506 F1: 72.4645295131795
+11/26/2017 01:06:10 [new best model saved.]
+11/26/2017 01:06:10 Epoch 24
+11/26/2017 01:06:10 epoch [24] updates[ 62032] train loss[4.92715] remaining[0:10:38] lr[0.0010]
+11/26/2017 01:10:05 epoch [24] updates[ 63032] train loss[4.89930] remaining[0:06:38] lr[0.0010]
+11/26/2017 01:13:54 epoch [24] updates[ 64032] train loss[4.87222] remaining[0:02:41] lr[0.0010]
+11/26/2017 01:17:45 dev EM: 63.46263008514664 F1: 72.58960029610837
+11/26/2017 01:17:46 [new best model saved.]
+11/26/2017 01:17:46 Epoch 25
+11/26/2017 01:17:46 epoch [25] updates[ 64729] train loss[4.85357] remaining[0:10:03] lr[0.0010]
+11/26/2017 01:21:41 epoch [25] updates[ 65729] train loss[4.82690] remaining[0:06:37] lr[0.0010]
+11/26/2017 01:25:35 epoch [25] updates[ 66729] train loss[4.80118] remaining[0:02:42] lr[0.0010]
+11/26/2017 01:29:33 dev EM: 63.24503311258278 F1: 73.15152823797965
+11/26/2017 01:29:34 [new best model saved.]
+11/26/2017 01:29:34 Epoch 26
+11/26/2017 01:29:35 epoch [26] updates[ 67426] train loss[4.78389] remaining[0:10:13] lr[0.0010]
+11/26/2017 01:33:28 epoch [26] updates[ 68426] train loss[4.75920] remaining[0:06:36] lr[0.0010]
+11/26/2017 01:37:23 epoch [26] updates[ 69426] train loss[4.73491] remaining[0:02:43] lr[0.0010]
+11/26/2017 01:41:19 dev EM: 64.02081362346263 F1: 73.41783734852103
+11/26/2017 01:41:21 [new best model saved.]
+11/26/2017 01:41:21 Epoch 27
+11/26/2017 01:41:21 epoch [27] updates[ 70123] train loss[4.71858] remaining[0:10:52] lr[0.0010]
+11/26/2017 01:45:16 epoch [27] updates[ 71123] train loss[4.69471] remaining[0:06:37] lr[0.0010]
+11/26/2017 01:49:10 epoch [27] updates[ 72123] train loss[4.67216] remaining[0:02:43] lr[0.0010]
+11/26/2017 01:53:07 dev EM: 64.43708609271523 F1: 73.65718554973216
+11/26/2017 01:53:08 [new best model saved.]
+11/26/2017 01:53:08 Epoch 28
+11/26/2017 01:53:09 epoch [28] updates[ 72820] train loss[4.65687] remaining[0:10:08] lr[0.0010]
+11/26/2017 01:57:03 epoch [28] updates[ 73820] train loss[4.63487] remaining[0:06:37] lr[0.0010]
+11/26/2017 02:00:58 epoch [28] updates[ 74820] train loss[4.61339] remaining[0:02:43] lr[0.0010]
+11/26/2017 02:04:56 dev EM: 63.746452223273415 F1: 73.35063329225459
+11/26/2017 02:04:56 Epoch 29
+11/26/2017 02:04:57 epoch [29] updates[ 75517] train loss[4.59845] remaining[0:10:09] lr[0.0010]
+11/26/2017 02:08:51 epoch [29] updates[ 76517] train loss[4.57739] remaining[0:06:38] lr[0.0010]
+11/26/2017 02:12:46 epoch [29] updates[ 77517] train loss[4.55700] remaining[0:02:43] lr[0.0010]
+11/26/2017 02:16:42 dev EM: 64.03973509933775 F1: 73.78308525991287
+11/26/2017 02:16:44 [new best model saved.]
+11/26/2017 02:16:44 Epoch 30
+11/26/2017 02:16:44 epoch [30] updates[ 78214] train loss[4.54317] remaining[0:10:59] lr[0.0010]
+11/26/2017 02:20:38 epoch [30] updates[ 79214] train loss[4.52303] remaining[0:06:37] lr[0.0010]
+11/26/2017 02:24:32 epoch [30] updates[ 80214] train loss[4.50366] remaining[0:02:42] lr[0.0010]
+11/26/2017 02:28:24 dev EM: 65.05203405865657 F1: 74.10761766440262
+11/26/2017 02:28:25 [new best model saved.]
+11/26/2017 02:28:25 Epoch 31
+11/26/2017 02:28:25 epoch [31] updates[ 80911] train loss[4.49078] remaining[0:10:34] lr[0.0010]
+11/26/2017 02:32:19 epoch [31] updates[ 81911] train loss[4.47165] remaining[0:06:36] lr[0.0010]
+11/26/2017 02:36:13 epoch [31] updates[ 82911] train loss[4.45301] remaining[0:02:42] lr[0.0010]
+11/26/2017 02:40:10 dev EM: 64.82497634815516 F1: 73.92518816405197
+11/26/2017 02:40:10 Epoch 32
+11/26/2017 02:40:11 epoch [32] updates[ 83608] train loss[4.44053] remaining[0:11:00] lr[0.0010]
+11/26/2017 02:44:05 epoch [32] updates[ 84608] train loss[4.42222] remaining[0:06:37] lr[0.0010]
+11/26/2017 02:47:59 epoch [32] updates[ 85608] train loss[4.40450] remaining[0:02:43] lr[0.0010]
+11/26/2017 02:51:54 dev EM: 64.98580889309366 F1: 74.19855900446845
+11/26/2017 02:51:55 [new best model saved.]
+11/26/2017 02:51:55 Epoch 33
+11/26/2017 02:51:55 epoch [33] updates[ 86305] train loss[4.39252] remaining[0:10:00] lr[0.0010]
+11/26/2017 02:55:44 epoch [33] updates[ 87305] train loss[4.37504] remaining[0:06:27] lr[0.0010]
+11/26/2017 02:59:31 epoch [33] updates[ 88305] train loss[4.35819] remaining[0:02:38] lr[0.0010]
+11/26/2017 03:03:20 dev EM: 65.52507095553453 F1: 74.65370699063669
+11/26/2017 03:03:21 [new best model saved.]
+11/26/2017 03:03:21 Epoch 34
+11/26/2017 03:03:22 epoch [34] updates[ 89002] train loss[4.34674] remaining[0:10:22] lr[0.0010]
+11/26/2017 03:07:10 epoch [34] updates[ 90002] train loss[4.33009] remaining[0:06:27] lr[0.0010]
+11/26/2017 03:11:04 epoch [34] updates[ 91002] train loss[4.31393] remaining[0:02:40] lr[0.0010]
+11/26/2017 03:14:54 dev EM: 66.20624408703878 F1: 75.02919437991864
+11/26/2017 03:14:56 [new best model saved.]
+11/26/2017 03:14:56 Epoch 35
+11/26/2017 03:14:56 epoch [35] updates[ 91699] train loss[4.30315] remaining[0:10:06] lr[0.0010]
+11/26/2017 03:18:45 epoch [35] updates[ 92699] train loss[4.28731] remaining[0:06:27] lr[0.0010]
+11/26/2017 03:22:31 epoch [35] updates[ 93699] train loss[4.27194] remaining[0:02:38] lr[0.0010]
+11/26/2017 03:26:26 dev EM: 65.43046357615894 F1: 74.70984206968171
+11/26/2017 03:26:27 Epoch 36
+11/26/2017 03:26:27 epoch [36] updates[ 94396] train loss[4.26118] remaining[0:10:44] lr[0.0010]
+11/26/2017 03:30:15 epoch [36] updates[ 95396] train loss[4.24574] remaining[0:06:26] lr[0.0010]
+11/26/2017 03:34:01 epoch [36] updates[ 96396] train loss[4.23083] remaining[0:02:37] lr[0.0010]
+11/26/2017 03:37:51 dev EM: 65.55345316934721 F1: 74.9704179335008
+11/26/2017 03:37:52 Epoch 37
+11/26/2017 03:37:52 epoch [37] updates[ 97093] train loss[4.22083] remaining[0:10:46] lr[0.0010]
+11/26/2017 03:41:40 epoch [37] updates[ 98093] train loss[4.20580] remaining[0:06:26] lr[0.0010]
+11/26/2017 03:45:26 epoch [37] updates[ 99093] train loss[4.19180] remaining[0:02:38] lr[0.0010]
+11/26/2017 03:49:14 dev EM: 66.25354777672659 F1: 74.89828398687334
+11/26/2017 03:49:15 Epoch 38
+11/26/2017 03:49:15 epoch [38] updates[ 99790] train loss[4.18199] remaining[0:10:17] lr[0.0010]
+11/26/2017 03:53:01 epoch [38] updates[100790] train loss[4.16755] remaining[0:06:23] lr[0.0010]
+11/26/2017 03:56:47 epoch [38] updates[101790] train loss[4.15390] remaining[0:02:37] lr[0.0010]
+11/26/2017 04:00:38 dev EM: 65.0236518448439 F1: 74.81526194569982
+11/26/2017 04:00:38 Epoch 39
+11/26/2017 04:00:39 epoch [39] updates[102487] train loss[4.14475] remaining[0:10:13] lr[0.0010]
+11/26/2017 04:04:30 epoch [39] updates[103487] train loss[4.13122] remaining[0:06:31] lr[0.0010]
+11/26/2017 04:08:15 epoch [39] updates[104487] train loss[4.11805] remaining[0:02:38] lr[0.0010]
+11/26/2017 04:12:09 dev EM: 66.3197729422895 F1: 74.98131994149773
+11/26/2017 04:12:10 Epoch 40
+11/26/2017 04:12:14 epoch [40] updates[105184] train loss[4.10911] remaining[0:10:31] lr[0.0010]
+11/26/2017 04:16:05 epoch [40] updates[106184] train loss[4.09581] remaining[0:06:32] lr[0.0010]
+11/26/2017 04:20:00 epoch [40] updates[107184] train loss[4.08317] remaining[0:02:42] lr[0.0010]
+11/26/2017 04:23:55 dev EM: 65.30747398297068 F1: 75.06526546929942
+11/26/2017 04:23:57 [new best model saved.]
+11/26/2017 04:23:57 Epoch 41
+11/26/2017 04:23:57 epoch [41] updates[107881] train loss[4.07466] remaining[0:10:44] lr[0.0010]
+11/26/2017 04:27:46 epoch [41] updates[108881] train loss[4.06204] remaining[0:06:28] lr[0.0010]
+11/26/2017 04:31:37 epoch [41] updates[109881] train loss[4.04992] remaining[0:02:39] lr[0.0010]
+11/26/2017 04:35:31 dev EM: 66.03595080416272 F1: 75.2277781497732
+11/26/2017 04:35:32 [new best model saved.]
+11/26/2017 04:35:32 Epoch 42
+11/26/2017 04:35:33 epoch [42] updates[110578] train loss[4.04148] remaining[0:11:46] lr[0.0010]
+11/26/2017 04:39:20 epoch [42] updates[111578] train loss[4.02903] remaining[0:06:26] lr[0.0010]
+11/26/2017 04:43:06 epoch [42] updates[112578] train loss[4.01753] remaining[0:02:37] lr[0.0010]
+11/26/2017 04:46:55 dev EM: 65.81835383159887 F1: 75.15467017711235
+11/26/2017 04:46:56 Epoch 43
+11/26/2017 04:46:56 epoch [43] updates[113275] train loss[4.00950] remaining[0:09:42] lr[0.0010]
+11/26/2017 04:50:43 epoch [43] updates[114275] train loss[3.99777] remaining[0:06:24] lr[0.0010]
+11/26/2017 04:54:35 epoch [43] updates[115275] train loss[3.98630] remaining[0:02:39] lr[0.0010]
+11/26/2017 04:58:26 dev EM: 66.38599810785242 F1: 75.45824888399599
+11/26/2017 04:58:27 [new best model saved.]
+11/26/2017 04:58:27 Epoch 44
+11/26/2017 04:58:28 epoch [44] updates[115972] train loss[3.97868] remaining[0:10:04] lr[0.0010]
+11/26/2017 05:02:15 epoch [44] updates[116972] train loss[3.96725] remaining[0:06:25] lr[0.0010]
+11/26/2017 05:06:01 epoch [44] updates[117972] train loss[3.95637] remaining[0:02:37] lr[0.0010]
+11/26/2017 05:10:00 dev EM: 66.45222327341533 F1: 75.56152702533731
+11/26/2017 05:10:02 [new best model saved.]
+11/26/2017 05:10:02 Epoch 45
+11/26/2017 05:10:02 epoch [45] updates[118669] train loss[3.94888] remaining[0:11:08] lr[0.0010]
+11/26/2017 05:13:54 epoch [45] updates[119669] train loss[3.93786] remaining[0:06:33] lr[0.0010]
+11/26/2017 05:17:44 epoch [45] updates[120669] train loss[3.92745] remaining[0:02:40] lr[0.0010]
+11/26/2017 05:21:39 dev EM: 65.62913907284768 F1: 75.3751054495528
+11/26/2017 05:21:40 Epoch 46
+11/26/2017 05:21:40 epoch [46] updates[121366] train loss[3.92015] remaining[0:09:53] lr[0.0010]
+11/26/2017 05:25:33 epoch [46] updates[122366] train loss[3.90940] remaining[0:06:35] lr[0.0010]
+11/26/2017 05:29:20 epoch [46] updates[123366] train loss[3.89921] remaining[0:02:40] lr[0.0010]
+11/26/2017 05:33:14 dev EM: 64.92904446546831 F1: 75.28473478849594
+11/26/2017 05:33:14 Epoch 47
+11/26/2017 05:33:15 epoch [47] updates[124063] train loss[3.89227] remaining[0:10:14] lr[0.0010]
+11/26/2017 05:37:02 epoch [47] updates[125063] train loss[3.88209] remaining[0:06:25] lr[0.0010]
+11/26/2017 05:40:52 epoch [47] updates[126063] train loss[3.87226] remaining[0:02:39] lr[0.0010]
+11/26/2017 05:44:41 dev EM: 66.38599810785242 F1: 75.62445715032068
+11/26/2017 05:44:42 [new best model saved.]
+11/26/2017 05:44:42 Epoch 48
+11/26/2017 05:44:43 epoch [48] updates[126760] train loss[3.86531] remaining[0:10:34] lr[0.0010]
+11/26/2017 05:48:37 epoch [48] updates[127760] train loss[3.85543] remaining[0:06:37] lr[0.0010]
+11/26/2017 05:52:25 epoch [48] updates[128760] train loss[3.84588] remaining[0:02:41] lr[0.0010]
+11/26/2017 05:56:18 dev EM: 66.55629139072848 F1: 75.76407175123298
+11/26/2017 05:56:20 [new best model saved.]
+11/26/2017 05:56:20 Epoch 49
+11/26/2017 05:56:20 epoch [49] updates[129457] train loss[3.83934] remaining[0:10:25] lr[0.0010]
+11/26/2017 06:00:08 epoch [49] updates[130457] train loss[3.82986] remaining[0:06:26] lr[0.0010]
+11/26/2017 06:03:57 epoch [49] updates[131457] train loss[3.82053] remaining[0:02:39] lr[0.0010]
+11/26/2017 06:07:51 dev EM: 67.07663197729423 F1: 76.00707576483558
+11/26/2017 06:07:52 [new best model saved.]
+11/26/2017 06:07:52 Epoch 50
+11/26/2017 06:07:53 epoch [50] updates[132154] train loss[3.81408] remaining[0:10:36] lr[0.0010]
+11/26/2017 06:11:40 epoch [50] updates[133154] train loss[3.80484] remaining[0:06:26] lr[0.0010]
+11/26/2017 06:15:31 epoch [50] updates[134154] train loss[3.79571] remaining[0:02:39] lr[0.0010]
+11/26/2017 06:19:21 dev EM: 66.86849574266793 F1: 76.06387085355708
+11/26/2017 06:19:23 [new best model saved.]
+11/26/2017 06:19:23 Epoch 51
+11/26/2017 06:19:23 epoch [51] updates[134851] train loss[3.78946] remaining[0:10:22] lr[0.0010]
+11/26/2017 06:23:15 epoch [51] updates[135851] train loss[3.78038] remaining[0:06:32] lr[0.0010]
+11/26/2017 06:27:04 epoch [51] updates[136851] train loss[3.77156] remaining[0:02:40] lr[0.0010]
+11/26/2017 06:30:56 dev EM: 66.97256385998108 F1: 75.76568012563007
+11/26/2017 06:30:57 Epoch 52
+11/26/2017 06:30:57 epoch [52] updates[137548] train loss[3.76562] remaining[0:09:47] lr[0.0010]
+11/26/2017 06:34:45 epoch [52] updates[138548] train loss[3.75682] remaining[0:06:25] lr[0.0010]
+11/26/2017 06:38:33 epoch [52] updates[139548] train loss[3.74848] remaining[0:02:38] lr[0.0010]
+11/26/2017 06:42:22 dev EM: 66.60359508041627 F1: 75.90631784465755
+11/26/2017 06:42:23 Epoch 53
+11/26/2017 06:42:23 epoch [53] updates[140245] train loss[3.74276] remaining[0:10:30] lr[0.0010]
+11/26/2017 06:46:10 epoch [53] updates[141245] train loss[3.73412] remaining[0:06:25] lr[0.0010]
+11/26/2017 06:49:59 epoch [53] updates[142245] train loss[3.72589] remaining[0:02:38] lr[0.0010]
+11/26/2017 06:53:49 dev EM: 66.42384105960265 F1: 75.71370401515028
+11/26/2017 06:53:50 Epoch 54
+11/26/2017 06:53:50 epoch [54] updates[142942] train loss[3.72024] remaining[0:10:34] lr[0.0010]
+11/26/2017 06:57:38 epoch [54] updates[143942] train loss[3.71200] remaining[0:06:26] lr[0.0010]
+11/26/2017 07:01:25 epoch [54] updates[144942] train loss[3.70408] remaining[0:02:38] lr[0.0010]
+11/26/2017 07:05:16 dev EM: 65.11825922421949 F1: 75.42715362630781
+11/26/2017 07:05:16 Epoch 55
+11/26/2017 07:05:17 epoch [55] updates[145639] train loss[3.69857] remaining[0:09:58] lr[0.0010]
+11/26/2017 07:09:08 epoch [55] updates[146639] train loss[3.69047] remaining[0:06:31] lr[0.0010]
+11/26/2017 07:12:55 epoch [55] updates[147639] train loss[3.68279] remaining[0:02:39] lr[0.0010]
+11/26/2017 07:16:44 dev EM: 66.9441816461684 F1: 76.05654911184081
+11/26/2017 07:16:45 Epoch 56
+11/26/2017 07:16:45 epoch [56] updates[148336] train loss[3.67742] remaining[0:10:24] lr[0.0010]
+11/26/2017 07:20:32 epoch [56] updates[149336] train loss[3.66966] remaining[0:06:24] lr[0.0010]
+11/26/2017 07:24:20 epoch [56] updates[150336] train loss[3.66207] remaining[0:02:38] lr[0.0010]
+11/26/2017 07:28:11 dev EM: 66.74550614947965 F1: 76.01365479692244
+11/26/2017 07:28:11 Epoch 57
+11/26/2017 07:28:12 epoch [57] updates[151033] train loss[3.65686] remaining[0:10:14] lr[0.0010]
+11/26/2017 07:32:00 epoch [57] updates[152033] train loss[3.64930] remaining[0:06:26] lr[0.0010]
+11/26/2017 07:35:47 epoch [57] updates[153033] train loss[3.64197] remaining[0:02:38] lr[0.0010]
+11/26/2017 07:39:39 dev EM: 67.1050141911069 F1: 76.26473761462368
+11/26/2017 07:39:40 [new best model saved.]
+11/26/2017 07:39:40 Epoch 58
+11/26/2017 07:39:40 epoch [58] updates[153730] train loss[3.63680] remaining[0:10:15] lr[0.0010]
+11/26/2017 07:43:28 epoch [58] updates[154730] train loss[3.62935] remaining[0:06:26] lr[0.0010]
+11/26/2017 07:47:16 epoch [58] updates[155730] train loss[3.62228] remaining[0:02:38] lr[0.0010]
+11/26/2017 07:51:07 dev EM: 66.25354777672659 F1: 76.08307451043736
+11/26/2017 07:51:08 Epoch 59
+11/26/2017 07:51:09 epoch [59] updates[156427] train loss[3.61734] remaining[0:10:49] lr[0.0010]
+11/26/2017 07:54:58 epoch [59] updates[157427] train loss[3.61022] remaining[0:06:28] lr[0.0010]
+11/26/2017 07:58:45 epoch [59] updates[158427] train loss[3.60326] remaining[0:02:39] lr[0.0010]
+11/26/2017 08:02:36 dev EM: 66.69820245979186 F1: 76.0173039367367
+11/26/2017 08:02:36 Epoch 60
+11/26/2017 08:02:37 epoch [60] updates[159124] train loss[3.59840] remaining[0:09:59] lr[0.0010]
+11/26/2017 08:06:24 epoch [60] updates[160124] train loss[3.59120] remaining[0:06:25] lr[0.0010]
+11/26/2017 08:10:11 epoch [60] updates[161124] train loss[3.58454] remaining[0:02:38] lr[0.0010]
+11/26/2017 08:14:02 dev EM: 66.9914853358562 F1: 76.13754593793128
+11/26/2017 08:14:03 Epoch 61
+11/26/2017 08:14:03 epoch [61] updates[161821] train loss[3.57988] remaining[0:11:57] lr[0.0010]
+11/26/2017 08:17:54 epoch [61] updates[162821] train loss[3.57298] remaining[0:06:31] lr[0.0010]
+11/26/2017 08:21:48 epoch [61] updates[163821] train loss[3.56641] remaining[0:02:41] lr[0.0010]
+11/26/2017 08:25:41 dev EM: 67.2942289498581 F1: 76.05943675488012
+11/26/2017 08:25:41 Epoch 62
+11/26/2017 08:25:42 epoch [62] updates[164518] train loss[3.56187] remaining[0:10:37] lr[0.0010]
+11/26/2017 08:29:34 epoch [62] updates[165518] train loss[3.55525] remaining[0:06:33] lr[0.0010]
+11/26/2017 08:33:21 epoch [62] updates[166518] train loss[3.54888] remaining[0:02:39] lr[0.0010]
+11/26/2017 08:37:11 dev EM: 66.91579943235573 F1: 76.15295489941248
+11/26/2017 08:37:11 Epoch 63
+11/26/2017 08:37:12 epoch [63] updates[167215] train loss[3.54445] remaining[0:09:46] lr[0.0010]
+11/26/2017 08:41:00 epoch [63] updates[168215] train loss[3.53796] remaining[0:06:27] lr[0.0010]
+11/26/2017 08:44:49 epoch [63] updates[169215] train loss[3.53167] remaining[0:02:38] lr[0.0010]
+11/26/2017 08:48:41 dev EM: 65.50614947965941 F1: 75.71510222851042
+11/26/2017 08:48:42 Epoch 64
+11/26/2017 08:48:42 epoch [64] updates[169912] train loss[3.52734] remaining[0:10:50] lr[0.0010]
+11/26/2017 08:52:36 epoch [64] updates[170912] train loss[3.52098] remaining[0:06:37] lr[0.0010]
+11/26/2017 08:56:30 epoch [64] updates[171912] train loss[3.51470] remaining[0:02:42] lr[0.0010]
+11/26/2017 09:00:21 dev EM: 66.27246925260171 F1: 75.82531670128306
+11/26/2017 09:00:22 Epoch 65
+11/26/2017 09:00:22 epoch [65] updates[172609] train loss[3.51055] remaining[0:10:16] lr[0.0010]
+11/26/2017 09:04:09 epoch [65] updates[173609] train loss[3.50436] remaining[0:06:25] lr[0.0010]
+11/26/2017 09:07:58 epoch [65] updates[174609] train loss[3.49838] remaining[0:02:38] lr[0.0010]
+11/26/2017 09:11:51 dev EM: 66.0643330179754 F1: 75.93260097476443
+11/26/2017 09:11:52 Epoch 66
+11/26/2017 09:11:52 epoch [66] updates[175306] train loss[3.49436] remaining[0:10:23] lr[0.0010]
+11/26/2017 09:15:44 epoch [66] updates[176306] train loss[3.48820] remaining[0:06:32] lr[0.0010]
+11/26/2017 09:19:33 epoch [66] updates[177306] train loss[3.48236] remaining[0:02:40] lr[0.0010]
+11/26/2017 09:23:23 dev EM: 66.47114474929045 F1: 76.18159969161515
+11/26/2017 09:23:23 Epoch 67
+11/26/2017 09:23:24 epoch [67] updates[178003] train loss[3.47841] remaining[0:11:09] lr[0.0010]
+11/26/2017 09:27:11 epoch [67] updates[179003] train loss[3.47251] remaining[0:06:25] lr[0.0010]
+11/26/2017 09:31:00 epoch [67] updates[180003] train loss[3.46678] remaining[0:02:38] lr[0.0010]
+11/26/2017 09:34:51 dev EM: 66.72658467360453 F1: 76.16866154270943
+11/26/2017 09:34:52 Epoch 68
+11/26/2017 09:34:52 epoch [68] updates[180700] train loss[3.46287] remaining[0:10:39] lr[0.0010]
+11/26/2017 09:38:42 epoch [68] updates[181700] train loss[3.45707] remaining[0:06:28] lr[0.0010]
+11/26/2017 09:42:28 epoch [68] updates[182700] train loss[3.45134] remaining[0:02:38] lr[0.0010]
+11/26/2017 09:46:18 dev EM: 65.68590350047303 F1: 75.9860385118548
+11/26/2017 09:46:19 Epoch 69
+11/26/2017 09:46:19 epoch [69] updates[183397] train loss[3.44757] remaining[0:10:31] lr[0.0010]
+11/26/2017 09:50:08 epoch [69] updates[184397] train loss[3.44171] remaining[0:06:28] lr[0.0010]
+11/26/2017 09:53:55 epoch [69] updates[185397] train loss[3.43624] remaining[0:02:38] lr[0.0010]
+11/26/2017 09:57:45 dev EM: 67.35099337748345 F1: 76.40048570810545
+11/26/2017 09:57:46 [new best model saved.]
+11/26/2017 09:57:46 Epoch 70
+11/26/2017 09:57:47 epoch [70] updates[186094] train loss[3.43260] remaining[0:10:15] lr[0.0010]
+11/26/2017 10:01:35 epoch [70] updates[187094] train loss[3.42709] remaining[0:06:27] lr[0.0010]
+11/26/2017 10:05:22 epoch [70] updates[188094] train loss[3.42163] remaining[0:02:38] lr[0.0010]
+11/26/2017 10:09:11 dev EM: 67.19016083254493 F1: 76.31348058545788
+11/26/2017 10:09:11 Epoch 71
+11/26/2017 10:09:12 epoch [71] updates[188791] train loss[3.41803] remaining[0:09:50] lr[0.0010]
+11/26/2017 10:12:59 epoch [71] updates[189791] train loss[3.41271] remaining[0:06:25] lr[0.0010]
+11/26/2017 10:16:46 epoch [71] updates[190791] train loss[3.40736] remaining[0:02:38] lr[0.0010]
+11/26/2017 10:20:36 dev EM: 67.08609271523179 F1: 76.55391508235695
+11/26/2017 10:20:37 [new best model saved.]
+11/26/2017 10:20:37 Epoch 72
+11/26/2017 10:20:37 epoch [72] updates[191488] train loss[3.40372] remaining[0:10:22] lr[0.0010]
+11/26/2017 10:24:25 epoch [72] updates[192488] train loss[3.39842] remaining[0:06:26] lr[0.0010]
+11/26/2017 10:28:16 epoch [72] updates[193488] train loss[3.39323] remaining[0:02:39] lr[0.0010]
+11/26/2017 10:32:05 dev EM: 67.918637653737 F1: 76.95407388971529
+11/26/2017 10:32:06 [new best model saved.]
+11/26/2017 10:32:06 Epoch 73
+11/26/2017 10:32:07 epoch [73] updates[194185] train loss[3.38980] remaining[0:10:29] lr[0.0010]
+11/26/2017 10:35:56 epoch [73] updates[195185] train loss[3.38469] remaining[0:06:29] lr[0.0010]
+11/26/2017 10:39:43 epoch [73] updates[196185] train loss[3.37972] remaining[0:02:38] lr[0.0010]
+11/26/2017 10:43:32 dev EM: 66.8306527909177 F1: 76.46137378562103
+11/26/2017 10:43:33 Epoch 74
+11/26/2017 10:43:33 epoch [74] updates[196882] train loss[3.37610] remaining[0:10:05] lr[0.0010]
+11/26/2017 10:47:24 epoch [74] updates[197882] train loss[3.37113] remaining[0:06:32] lr[0.0010]
+11/26/2017 10:51:11 epoch [74] updates[198882] train loss[3.36604] remaining[0:02:39] lr[0.0010]
+11/26/2017 10:55:00 dev EM: 67.48344370860927 F1: 76.59130935494615
+11/26/2017 10:55:01 Epoch 75
+11/26/2017 10:55:01 epoch [75] updates[199579] train loss[3.36269] remaining[0:10:04] lr[0.0010]
+11/26/2017 10:58:50 epoch [75] updates[200579] train loss[3.35766] remaining[0:06:27] lr[0.0010]
+11/26/2017 11:02:37 epoch [75] updates[201579] train loss[3.35284] remaining[0:02:38] lr[0.0010]
+11/26/2017 11:06:29 dev EM: 66.51844843897824 F1: 76.43471684076617
+11/26/2017 11:06:30 Epoch 76
+11/26/2017 11:06:30 epoch [76] updates[202276] train loss[3.34963] remaining[0:10:12] lr[0.0010]
+11/26/2017 11:10:18 epoch [76] updates[203276] train loss[3.34481] remaining[0:06:25] lr[0.0010]
+11/26/2017 11:14:07 epoch [76] updates[204276] train loss[3.34011] remaining[0:02:38] lr[0.0010]
+11/26/2017 11:17:56 dev EM: 67.19016083254493 F1: 76.58818342102781
+11/26/2017 11:17:57 Epoch 77
+11/26/2017 11:17:58 epoch [77] updates[204973] train loss[3.33686] remaining[0:10:05] lr[0.0010]
+11/26/2017 11:21:49 epoch [77] updates[205973] train loss[3.33211] remaining[0:06:32] lr[0.0010]
+11/26/2017 11:25:36 epoch [77] updates[206973] train loss[3.32744] remaining[0:02:39] lr[0.0010]
+11/26/2017 11:29:27 dev EM: 66.60359508041627 F1: 76.56521484326974
+11/26/2017 11:29:28 Epoch 78
+11/26/2017 11:29:29 epoch [78] updates[207670] train loss[3.32429] remaining[0:10:43] lr[0.0010]
+11/26/2017 11:33:20 epoch [78] updates[208670] train loss[3.31956] remaining[0:06:32] lr[0.0010]
+11/26/2017 11:37:08 epoch [78] updates[209670] train loss[3.31506] remaining[0:02:39] lr[0.0010]
+11/26/2017 11:40:56 dev EM: 65.73320719016083 F1: 76.02152030467165
+11/26/2017 11:40:56 Epoch 79
+11/26/2017 11:40:57 epoch [79] updates[210367] train loss[3.31198] remaining[0:10:23] lr[0.0010]
+11/26/2017 11:44:45 epoch [79] updates[211367] train loss[3.30727] remaining[0:06:27] lr[0.0010]
+11/26/2017 11:48:33 epoch [79] updates[212367] train loss[3.30286] remaining[0:02:38] lr[0.0010]
+11/26/2017 11:52:29 dev EM: 67.27530747398298 F1: 76.60714707583782
+11/26/2017 11:52:29 Epoch 80
+11/26/2017 11:52:30 epoch [80] updates[213064] train loss[3.29982] remaining[0:09:53] lr[0.0010]
+11/26/2017 11:56:19 epoch [80] updates[214064] train loss[3.29518] remaining[0:06:29] lr[0.0010]
+11/26/2017 12:00:08 epoch [80] updates[215064] train loss[3.29084] remaining[0:02:39] lr[0.0010]
+11/26/2017 12:04:00 dev EM: 67.66319772942289 F1: 76.69812112719839
+11/26/2017 12:05:09 [program starts.]
+11/26/2017 12:05:45 [Data loaded.]
+11/26/2017 12:05:45 [loading previous model...]
+11/26/2017 12:09:31 [program starts.]
+11/26/2017 12:10:04 [Data loaded.]
+11/26/2017 12:10:04 [loading previous model...]
