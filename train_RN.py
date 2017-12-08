@@ -89,9 +89,9 @@ parser.add_argument('--rnn_type', default='lstm',
                     help='supported types: rnn, gru, lstm')
 parser.add_argument('--num_objects', type=int, default=10,
                     help='The number of objects needed for relationNet.')
-parser.add_argument('--reduction_ratio', type=int, default=2,
+parser.add_argument('--reduction_ratio', type=int, default=4,
                     help='reduction_ratio')
-parser.add_argument('--num_heads', type=int, default=2,
+parser.add_argument('--num_heads', type=int, default=4,
                     help='The number of heads')
 
 
