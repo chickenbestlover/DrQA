@@ -81,7 +81,7 @@ parser.add_argument('--use_qemb', type=str2bool, nargs='?', const=True, default=
 parser.add_argument('--concat_rnn_layers', type=str2bool, nargs='?',
                     const=True, default=False)
 parser.add_argument('--dropout_emb', type=float, default=0.5)
-parser.add_argument('--dropout_rnn', type=float, default=0.2)
+parser.add_argument('--dropout_rnn', type=float, default=0.1)
 parser.add_argument('--dropout_rnn_output', type=str2bool, nargs='?',
                     const=True, default=True)
 parser.add_argument('--max_len', type=int, default=15)
@@ -89,9 +89,9 @@ parser.add_argument('--rnn_type', default='lstm',
                     help='supported types: rnn, gru, lstm')
 parser.add_argument('--num_objects', type=int, default=10,
                     help='The number of objects needed for relationNet.')
-parser.add_argument('--reduction_ratio', type=int, default=4,
+parser.add_argument('--reduction_ratio', type=int, default=8,
                     help='reduction_ratio')
-parser.add_argument('--num_heads', type=int, default=4,
+parser.add_argument('--num_heads', type=int, default=8,
                     help='The number of heads')
 parser.add_argument('--use_cove', type=str2bool,nargs='?', const=True, default=True)
 

@@ -132,7 +132,7 @@ class RnnDocReader(nn.Module):
 
         x2_emb = torch.cat([x2_emb, x2_emb_cove], dim=2)
         x1_emb = torch.cat([x1_emb, x1_emb_cove], dim=2)
-        
+
         drnn_input_list = [x1_emb, x1_f]
         # Add attention-weighted question representation
         if self.opt['use_qemb']:

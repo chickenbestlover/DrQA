@@ -49,8 +49,15 @@ class DocReaderModel(object):
                                        momentum=opt['momentum'],
                                        weight_decay=opt['weight_decay'])
         elif opt['optimizer'] == 'adamax':
-            self.optimizer = optim.Adamax(parameters, opt['learning_rate'],
-                                          weight_decay=opt['weight_decay'])
+            if opt['fine_tune']:
+                self.optimizer = optim.Adamax(parameters, opt['learning_rate'],
+                                              weight_decay=opt['weight_decay'])
+
+            else:
+
+                self.optimizer = optim.Adamax(parameters, opt['learning_rate'],
+                                              weight_decay=opt['weight_decay'])
+
         else:
             raise RuntimeError('Unsupported optimizer: %s' % opt['optimizer'])
         if state_dict:
