@@ -94,6 +94,8 @@ parser.add_argument('--reduction_ratio', type=int, default=8,
 parser.add_argument('--num_heads', type=int, default=8,
                     help='The number of heads')
 parser.add_argument('--use_cove', type=str2bool,nargs='?', const=True, default=True)
+parser.add_argument('--fine_tune', type=str2bool,nargs='?', const=True, default=True)
+
 
 args = parser.parse_args()
 
