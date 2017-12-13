@@ -59,26 +59,27 @@ class RnnDocReader(nn.Module):
         # Projection for attention weighted question
         if opt['use_qemb']:
             self.qemb_match = layers.SeqAttnMatch(3 * opt['embedding_dim'])
-
-        self.cove_embedding = MTLSTM(n_vocab=embedding.size(0),vectors=embedding.clone())
-        for p in self.cove_embedding.parameters():
-            p.requires_grad=False
+        if opt['use_cove']:
+            self.cove_embedding = MTLSTM(n_vocab=embedding.size(0),vectors=embedding.clone())
+            for p in self.cove_embedding.parameters():
+                p.requires_grad=False
 
         # Input size to RNN: word emb + question emb + manual features
         doc_input_size = opt['embedding_dim'] + opt['num_features']
-
+        question_input_size = opt['embedding_dim']
         if opt['use_qemb']:
             doc_input_size += opt['embedding_dim']
         if opt['pos']:
             doc_input_size += opt['pos_dim']
         if opt['ner']:
             doc_input_size += opt['ner_dim']
+        if opt['use_cove']:
+            # for Cove
+            doc_input_size+=2* opt['embedding_dim']
+            question_input_size += 2*opt['embedding_dim']
 
-        # for Cove
-        doc_input_size+=2* opt['embedding_dim']
-        #question_input_size = 2*opt['embedding_dim']
         print('doc_input_size:',doc_input_size)
-        self.attention_rnns= custom.AttentionRNN(opt,doc_input_size=doc_input_size,question_input_size=3*opt['embedding_dim'], ratio=opt['reduction_ratio'])
+        self.attention_rnns= custom.AttentionRNN(opt,doc_input_size=doc_input_size,question_input_size=question_input_size, ratio=opt['reduction_ratio'])
 
         # Output sizes of rnn encoders
         doc_hidden_size = 2 * opt['hidden_size'] +opt['hidden_size']//opt['reduction_ratio']
@@ -113,14 +114,15 @@ class RnnDocReader(nn.Module):
         """
         # Embed both document and question
         x1_emb = self.embedding(x1)
-        x1_emb_cove=self.cove_embedding(x1,torch.LongTensor(x1.size(0)).fill_(x1.size(1)).cuda())
-
+        if self.opt['use_cove']:
+            x1_emb_cove=self.cove_embedding(x1,torch.LongTensor(x1.size(0)).fill_(x1.size(1)).cuda())
         #x1_emb_order = self.embedding_order(x1_order)
+
         x2_emb = self.embedding(x2)
+        if self.opt['use_cove']:
+            x2_emb_cove=  self.cove_embedding(x2,torch.LongTensor(x2.size(0)).fill_(x2.size(1)).cuda())
         #x2_emb += self.embedding_order(x2_order)
-        x2_emb_cove=  self.cove_embedding(x2,torch.LongTensor(x2.size(0)).fill_(x2.size(1)).cuda())
-        x1_emb = torch.cat([x1_emb,x1_emb_cove],dim=2)
-        x2_emb = torch.cat([x2_emb, x2_emb_cove], dim=2)
+
 
         if self.opt['dropout_emb'] > 0:
             x1_emb = nn.functional.dropout(x1_emb, p=self.opt['dropout_emb'],
@@ -128,7 +130,9 @@ class RnnDocReader(nn.Module):
             x2_emb = nn.functional.dropout(x2_emb, p=self.opt['dropout_emb'],
                                            training=self.training)
 
-
+        x2_emb = torch.cat([x2_emb, x2_emb_cove], dim=2)
+        x1_emb = torch.cat([x1_emb, x1_emb_cove], dim=2)
+        
         drnn_input_list = [x1_emb, x1_f]
         # Add attention-weighted question representation
         if self.opt['use_qemb']:

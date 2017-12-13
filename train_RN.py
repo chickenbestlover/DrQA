@@ -93,7 +93,7 @@ parser.add_argument('--reduction_ratio', type=int, default=4,
                     help='reduction_ratio')
 parser.add_argument('--num_heads', type=int, default=4,
                     help='The number of heads')
-
+parser.add_argument('--use_cove', type=str2bool,nargs='?', const=True, default=True)
 
 args = parser.parse_args()
 
