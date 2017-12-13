@@ -9,7 +9,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
-from .rnn_reader_RN_q_3 import RnnDocReader
+from .rnn_reader_RN_q_4 import RnnDocReader
 from .utils import AverageMeter
 
 
@@ -50,8 +50,15 @@ class DocReaderModel(object):
                                        weight_decay=opt['weight_decay'])
         elif opt['optimizer'] == 'adamax':
             if opt['fine_tune']:
-                self.optimizer = optim.Adamax(parameters, opt['learning_rate'],
-                                              weight_decay=opt['weight_decay'])
+                ignored_params = list(map(id, self.network.cove_embedding.parameters()))
+                base_params = filter(lambda p: id(p) not in ignored_params,
+                                     self.network.parameters())
+                self.optimizer = optim.Adamax(params=[
+                                              {'params': base_params},
+                                             # {'params': self.network.cove_embedding.parameters(), 'lr':0.0*opt['learning_rate']}
+                                              ]
+                                              , lr=opt['learning_rate']
+                                              )
 
             else:
 
@@ -64,7 +71,9 @@ class DocReaderModel(object):
             self.optimizer.load_state_dict(state_dict['optimizer'])
 	
         num_params = sum(p.data.numel() for p in parameters
-            if p.data.data_ptr() != self.network.embedding.weight.data.data_ptr())
+#            if p.data.data_ptr() != self.network.embedding.weight.data.data_ptr())
+             if p.data.data_ptr() != self.network.cove_embedding.vectors.weight.data.data_ptr())
+
         print ("{} parameters".format(num_params))
 
     def update(self, ex):
@@ -101,7 +110,7 @@ class DocReaderModel(object):
         self.updates += 1
 
         # Reset any partially fixed parameters (e.g. rare words)
-        self.reset_parameters()
+#        self.reset_parameters()
 
     def predict(self, ex):
         # Eval mode

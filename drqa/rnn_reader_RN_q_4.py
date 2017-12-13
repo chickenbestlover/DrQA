@@ -27,7 +27,7 @@ class RnnDocReader(nn.Module):
         super(RnnDocReader, self).__init__()
         # Store config
         self.opt = opt
-
+        '''
         # Word embeddings
         if opt['pretrained_words']:
             assert embedding is not None
@@ -50,6 +50,7 @@ class RnnDocReader(nn.Module):
             self.embedding = nn.Embedding(opt['vocab_size'],
                                           opt['embedding_dim'],
                                           padding_idx=padding_idx)
+        '''
         if opt['pos']:
             self.pos_embedding = nn.Embedding(opt['pos_size'], opt['pos_dim'])
             if normalize_emb: normalize_emb_(self.pos_embedding.weight.data)
@@ -60,7 +61,7 @@ class RnnDocReader(nn.Module):
         if opt['use_qemb']:
             self.qemb_match = layers.SeqAttnMatch(3 * opt['embedding_dim'])
         if opt['use_cove']:
-            self.cove_embedding = MTLSTM(n_vocab=embedding.size(0),vectors=embedding.clone())
+            self.cove_embedding = MTLSTM(n_vocab=embedding.size(0),vectors=embedding.clone(),residual_embeddings=True)
             if not opt['fine_tune']:
                 for p in self.cove_embedding.parameters():
                     p.requires_grad=False
@@ -113,18 +114,19 @@ class RnnDocReader(nn.Module):
         x2 = question word indices             [batch * len_q]
         x2_mask = question padding mask        [batch * len_q]
         """
+
         # Embed both document and question
-        x1_emb = self.embedding(x1)
+        #x1_emb = self.embedding(x1)
         if self.opt['use_cove']:
             x1_emb_cove=self.cove_embedding(x1,torch.LongTensor(x1.size(0)).fill_(x1.size(1)).cuda())
         #x1_emb_order = self.embedding_order(x1_order)
 
-        x2_emb = self.embedding(x2)
+        #x2_emb = self.embedding(x2)
         if self.opt['use_cove']:
             x2_emb_cove=  self.cove_embedding(x2,torch.LongTensor(x2.size(0)).fill_(x2.size(1)).cuda())
         #x2_emb += self.embedding_order(x2_order)
 
-
+        '''
         if self.opt['dropout_emb'] > 0:
             x1_emb = nn.functional.dropout(x1_emb, p=self.opt['dropout_emb'],
                                                training=self.training)
@@ -133,6 +135,11 @@ class RnnDocReader(nn.Module):
 
         x2_emb = torch.cat([x2_emb, x2_emb_cove], dim=2)
         x1_emb = torch.cat([x1_emb, x1_emb_cove], dim=2)
+        '''
+
+        x2_emb = x2_emb_cove
+        x1_emb = x1_emb_cove
+
 
         drnn_input_list = [x1_emb, x1_f]
         # Add attention-weighted question representation
